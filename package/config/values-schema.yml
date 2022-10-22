@@ -1,0 +1,5 @@
+#@data/values-schema
+
+---
+#@schema/desc "The namespace in which to deploy Cert Manager"
+namespace: cert-manager

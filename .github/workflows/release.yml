@@ -1,0 +1,223 @@
+name: Release
+on:
+  - workflow_dispatch
+
+env:
+  COSIGN_EXPERIMENTAL: 1
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  VERSION: 1.10.0
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      image-release: ${{ steps.image-info.outputs.release }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3.1.0
+
+      - name: Set up Carvel
+        uses: vmware-tanzu/carvel-setup-action@v1.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log into container registry
+        uses: redhat-actions/podman-login@v1.4
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+      
+      - name: Create k3d cluster
+        run: |
+          # Initialize brew because of https://github.com/actions/runner-images/issues/6283
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew install k3d
+          k3d cluster create test-cluster
+
+          # Wait for the generation of a token for the Service Account
+          while [ $(kubectl get configmap kube-root-ca.crt --no-headers | wc -l) -eq 0 ] ; do
+            sleep 3
+          done
+
+      - name: Package and publish OCI bundle
+        run: |
+          kctrl package release -y --version ${{ env.VERSION }} \
+            --chdir package \
+            --copy-to ../carvel-artifacts \
+            --repo-output ../repo
+      
+      - name: Get released OCI image name with digest
+        id: image-info
+        run: |
+          package_file=$(find carvel-artifacts/packages -name 'package.yml')
+          image_release=$(yq '.spec.template.spec.fetch[0].imgpkgBundle.image' ${package_file})
+          echo "IMAGE_RELEASE=${image_release}" >> $GITHUB_ENV
+          echo "release=${image_release}" >> $GITHUB_OUTPUT
+      
+      - name: Add additional tags to OCI image
+        run: |
+          podman pull ${IMAGE_RELEASE}
+          podman tag ${IMAGE_RELEASE} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          podman tag ${IMAGE_RELEASE} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          podman push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          podman push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      
+      - name: Create a release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v${{ env.VERSION }} \
+                --generate-notes \
+                ./carvel-artifacts/packages/cert-manager.packages.kadras.io/package.yml \
+                ./carvel-artifacts/packages/cert-manager.packages.kadras.io/metadata.yml \
+                ./README.md
+      
+      - name: Upload package.yml artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: ${{ env.VERSION }}.yml
+          path: ./repo/packages/cert-manager.packages.kadras.io/${{ env.VERSION }}.yml
+          retention-days: 1
+      
+      - name: Upload metadata.yml artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: metadata.yml
+          path: ./repo/packages/cert-manager.packages.kadras.io/metadata.yml
+          retention-days: 1
+
+  sign:
+    name: Sign
+    runs-on: ubuntu-22.04
+    needs: [build]
+    permissions:
+      packages: write
+      id-token: write
+    env:
+      IMAGE_RELEASE: ${{ needs.build.outputs.image-release }}
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v2.8.1
+        with:
+          cosign-release: 'v1.13.0'
+
+      - name: Log into container registry
+        uses: redhat-actions/podman-login@v1.4
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+
+      - name: Sign image
+        run: |
+          cosign sign "${IMAGE_RELEASE}"
+  
+  provenance:
+    name: Provenance
+    runs-on: ubuntu-22.04
+    needs: [build,sign]
+    permissions:
+      packages: write
+      id-token: write
+    env:
+      IMAGE_RELEASE: ${{ needs.build.outputs.image-release }}
+      PROVENANCE_FILE: provenance.att
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v2.8.1
+        with:
+          cosign-release: 'v1.13.0'
+      
+      - name: Log into container registry
+        uses: redhat-actions/podman-login@v1.4
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+      
+      - name: Extract digest
+        run: |
+          digest=$(echo ${IMAGE_RELEASE} | cut -d "@" -f2)
+          echo "IMAGE_DIGEST=${digest}" >> $GITHUB_ENV
+
+      - name: Generate provenance
+        uses: philips-labs/slsa-provenance-action@v0.7.2
+        with:
+          command: generate
+          subcommand: container
+          arguments: --repository ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} --tags ${{ env.VERSION }} --digest ${{ env.IMAGE_DIGEST }} --output-path ${{ env.PROVENANCE_FILE }}
+        env:
+          COSIGN_EXPERIMENTAL: 0
+
+      - name: Attach provenance
+        run: |
+          jq '.predicate' "${PROVENANCE_FILE}" > provenance-predicate.att
+          cosign attest --predicate provenance-predicate.att --type slsaprovenance "${IMAGE_RELEASE}"
+
+      - uses: actions/upload-artifact@v3.1.1
+        with:
+          name: provenance.att
+          path: ${{ env.PROVENANCE_FILE }}
+
+  repo:
+    name: Package Repository
+    runs-on: ubuntu-22.04
+    needs: [provenance]
+    permissions:
+      contents: read
+    env:
+      PACKAGE_REPO: kadras-packages
+    steps:
+      - name: Download package.yml artifact
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: ${{ env.VERSION }}.yml
+          path: ./artifacts
+      
+      - name: Download metadata.yml artifact
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: metadata.yml
+          path: ./artifacts
+
+      - name: Checkout package repository source code
+        uses: actions/checkout@v3.1.0
+        with:
+          path: kadras-packages
+          repository: ${{ github.repository_owner }}/${{ env.PACKAGE_REPO }}
+          ref: main
+          token: ${{ secrets.GH_ORG_PAT }}
+
+      - name: Push release artifacts to package repository
+        env:
+          GH_TOKEN: ${{ secrets.GH_ORG_PAT }}
+        run: |
+          package_path=kadras-packages/repo/packages/cert-manager.packages.kadras.io
+          if [ ! -f ${package_path} ]; then
+            mkdir -p ${package_path}
+          fi
+
+          mv -f artifacts/${{ env.VERSION }}.yml ${package_path}/${{ env.VERSION }}.yml
+          mv -f artifacts/metadata.yml ${package_path}/metadata.yml
+
+          cd kadras-packages
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          branch_name=$(date +%s | base64)
+          git checkout -b ${branch_name}
+
+          git add repo/packages/cert-manager.packages.kadras.io/${{ env.VERSION }}.yml
+          git add repo/packages/cert-manager.packages.kadras.io/metadata.yml
+
+          git commit -m "Update Cert Manager metadata and add version ${VERSION}"
+          git push origin ${branch_name}
+
+          gh pr create -f --base main --title "Add Cert Manager ${VERSION}" --body "Update Cert Manager metadata and add version ${VERSION}"
