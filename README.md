@@ -39,7 +39,7 @@ Either way, you can then install the Cert Manager package using [`kctrl`](https:
 ```shell
 kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.0-kadras.1 \
+    -v 1.10.0+kadras.2 \
     -n carvel-packages
 ```
 
@@ -74,7 +74,7 @@ Then, reference it from the `kctrl` command when installing or upgrading the pac
 ```shell
 kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.0-kadras.1 \
+    -v 1.10.0+kadras.2 \
     -n carvel-packages \
     --values-file values.yml
 ```
