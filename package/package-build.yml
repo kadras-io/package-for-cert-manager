@@ -11,7 +11,11 @@ spec:
       app:
         spec:
           deploy:
-          - kapp: {}
+          - kapp:
+              rawOptions:
+              - --wait-timeout=5m
+              - --kube-api-qps=50
+              - --kube-api-burst=100
           template:
           - ytt:
               paths:
