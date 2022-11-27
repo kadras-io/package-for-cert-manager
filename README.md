@@ -29,7 +29,7 @@ Then, install the Cert Manager package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1 \
+    -v 1.10.1+kadras.1 \
     -n kadras-packages
   ```
 
@@ -43,7 +43,7 @@ You can verify the list of installed Carvel packages and their status.
 
 ### Version
 
-You can get the list of versions available in the Kadras package repository for Cert Manager.
+You can get the list of Cert Manager versions available in the Kadras package repository.
 
   ```shell
   kctrl package available list -p cert-manager.packages.kadras.io -n kadras-packages
@@ -68,7 +68,7 @@ Then, pass the file when installing the package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1 \
+    -v 1.10.1+kadras.1 \
     -n kadras-packages \
     --values-file values.yml
   ```
@@ -93,8 +93,7 @@ You can also update an existing package with a newer `values.yml` file.
 
 ## Other
 
-The recommended way of installing the Cert Manager package is via the [Kadras package repository](https://github.com/arktonix/kadras-packages). If you prefer not using the repository, you can install the package by creating the necessary Carvel `PackageMetadata` and `Package` resources directly
-using [`kapp`](https://carvel.dev/kapp/docs/latest/install) or `kubectl`.
+The recommended way of installing the Cert Manager package is via the [Kadras package repository](https://github.com/arktonix/kadras-packages). If you prefer not using the repository, you can install the package by creating the necessary Carvel `PackageMetadata` and `Package` resources directly using [`kapp`](https://carvel.dev/kapp/docs/latest/install) or `kubectl`.
 
   ```shell
   kubectl create namespace kadras-packages
