@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 echo -e "\n🚢 Setting up Kubernetes cluster...\n"
 
 kapp deploy -a test-setup -f test/test-setup -y

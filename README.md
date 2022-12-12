@@ -1,5 +1,7 @@
 # Cert Manager
 
+<a href="https://slsa.dev/spec/v0.1/levels"><img src="https://slsa.dev/images/gh-badge-level3.svg" alt="The SLSA Level 3 badge"></a>
+
 This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs/latest/packaging) for [Cert Manager](https://cert-manager.io), a cloud-native solution to automatically provision and manage TLS certificates in Kubernetes.
 
 ## Prerequisites
@@ -29,7 +31,7 @@ Then, install the Cert Manager package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1+kadras.1 \
+    -v 1.10.1+kadras.2 \
     -n kadras-packages
   ```
 
@@ -68,7 +70,7 @@ Then, pass the file when installing the package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1+kadras.1 \
+    -v 1.10.1+kadras.2 \
     -n kadras-packages \
     --values-file values.yml
   ```
@@ -112,6 +114,6 @@ This package is based on the original Cert Manager package used in [Tanzu Commun
 
 ## Supply Chain Security
 
-This project is compliant with level 2 of the [SLSA Framework](https://slsa.dev).
+This project is compliant with level 3 of the [SLSA Framework](https://slsa.dev).
 
-<img src="https://slsa.dev/images/SLSA-Badge-full-level2.svg" alt="The SLSA Level 2 badge" width=200>
+<img src="https://slsa.dev/images/SLSA-Badge-full-level3.svg" alt="The SLSA Level 3 badge" width=200>
