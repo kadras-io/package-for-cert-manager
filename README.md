@@ -31,7 +31,7 @@ Then, install the Cert Manager package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1+kadras.2 \
+    -v 1.10.2 \
     -n kadras-packages
   ```
 
@@ -70,7 +70,7 @@ Then, pass the file when installing the package.
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.10.1+kadras.2 \
+    -v 1.10.2 \
     -n kadras-packages \
     --values-file values.yml
   ```
