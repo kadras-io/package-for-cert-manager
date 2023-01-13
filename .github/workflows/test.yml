@@ -8,7 +8,7 @@ jobs:
     name: Configuration Tests
     permissions:
       contents: read
-    uses: arktonix/cloud-native-utils/.github/workflows/package-test-config.yml@main
+    uses: kadras-io/github-reusable-workflows/.github/workflows/package-test-config.yml@main
     with:
       command: make test-config
 
@@ -16,6 +16,6 @@ jobs:
     name: Integration Tests
     permissions:
       contents: read
-    uses: arktonix/cloud-native-utils/.github/workflows/package-test-integration.yml@main
+    uses: kadras-io/github-reusable-workflows/.github/workflows/package-test-integration.yml@main
     with:
       command: make test-integration

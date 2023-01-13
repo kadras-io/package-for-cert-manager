@@ -23,7 +23,7 @@ spec:
           - kbld: {}
       export:
       - imgpkgBundle:
-          image: ghcr.io/arktonix/package-for-cert-manager
+          image: ghcr.io/kadras-io/package-for-cert-manager
           useKbldImagesLock: true
         includePaths:
         - config
