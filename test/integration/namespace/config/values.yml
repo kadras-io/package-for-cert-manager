@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-manager-values
+  namespace: tests
+stringData:
+  values.yaml: |
+    namespace: custom-ns
+    leader_election:
+      namespace: custom-ns

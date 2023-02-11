@@ -1,0 +1,25 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! In some cloud environments like AWS EKS, the webhook requires some customizations.
+#! See: https://cert-manager.io/docs/installation/compatibility.
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-webhook"}})
+---
+spec:
+  template:
+    spec:
+      #@ if/end data.values.webhook.host_network:
+      #@overlay/match missing_ok=True
+      hostNetwork: true
+      containers:
+      #@overlay/match by="name"
+      - name: cert-manager-webhook
+        args:
+          #@overlay/match by=lambda i,l,r: l.startswith("--secure-port=")
+          - #@ "--secure-port={}".format(data.values.webhook.secure_port)
+        ports:
+          #@overlay/match by="name"
+          - name: https
+            #@overlay/replace
+            containerPort: #@ data.values.webhook.secure_port

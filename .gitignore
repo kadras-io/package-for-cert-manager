@@ -1,6 +1,12 @@
 ### Carvel ###
 carvel-artifacts/
 repo/
+schema-openapi.yml
+
+### KUTTL ###
+test/integration/kubeconfig
+test/integration/kuttl-artifacts
+kubeconfig
 
 # Binaries for programs and plugins
 *.exe

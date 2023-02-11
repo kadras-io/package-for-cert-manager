@@ -1,0 +1,103 @@
+# AKS Support
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/instance: cert-manager
+  annotations:
+    admissions.enforcer/disabled: "true"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/instance: cert-manager
+  annotations:
+    admissions.enforcer/disabled: "true"
+
+# High Availability
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  replicas: 1
+status:
+  readyReplicas: 1 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: cert-manager
+spec:
+  replicas: 1
+status:
+  readyReplicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  replicas: 1
+status:
+  readyReplicas: 1
+
+# Image Pull Secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: canonical-registry-credentials
+  namespace: cert-manager
+  annotations:
+    secretgen.carvel.dev/image-pull-secret: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: canonical-registry-credentials
+
+# Private CA
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kadras-bootstrap-issuer
+status:
+  conditions:
+  - reason: IsReady
+    status: "True"
+    type: Ready
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kadras-root-ca
+  namespace: cert-manager
+status:
+  conditions:
+  - status: "True"
+    type: Ready
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kadras-ca-issuer
+status:
+  conditions:
+  - status: "True"
+    type: Ready

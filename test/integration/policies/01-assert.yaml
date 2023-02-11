@@ -1,0 +1,6 @@
+# Policies - Kyverno
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: cert-manager-verify-image
