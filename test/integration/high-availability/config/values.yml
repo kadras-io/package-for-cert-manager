@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-manager-values
+  namespace: tests
+stringData:
+  values.yaml: |
+    leader_election:
+      namespace: cert-manager
+      lease_duration: "30s"
+      renew_deadline: "20s"
+      retry_period: "10s"
+    webhook:
+      replicas: 2

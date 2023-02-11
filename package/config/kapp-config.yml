@@ -1,0 +1,18 @@
+---
+apiVersion: kapp.k14s.io/v1alpha1
+kind: Config
+
+minimumRequiredVersion: 0.50.0
+
+#! Wait rules specify how to wait for resources that kapp does not wait for by default.
+#! See more about the wait rules: https://carvel.dev/kapp/docs/latest/config/#waitrules.
+waitRules:
+
+- supportsObservedGeneration: false
+  conditionMatchers:
+  - type: Ready
+    status: "True"
+    success: true
+  resourceMatchers:
+  - apiVersionKindMatcher: {apiVersion: cert-manager.io/v1, kind: Certificate}
+  - apiVersionKindMatcher: {apiVersion: cert-manager.io/v1, kind: ClusterIssuer}

@@ -1,0 +1,43 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name":"cert-manager"}})
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: #@ data.values.namespace
+
+#@overlay/match by=overlay.subset({"metadata":{"namespace":"cert-manager"}}), expects="11+"
+---
+metadata:
+  namespace: #@ data.values.namespace
+
+#@ cluster_role_binding = overlay.subset({"kind":"ClusterRoleBinding"})
+#@ role_binding = overlay.subset({"kind":"RoleBinding"})
+
+#@overlay/match by=overlay.or_op(cluster_role_binding, role_binding), expects=13
+---
+subjects:
+#@overlay/match by=overlay.subset({"namespace": "cert-manager"})
+- kind: ServiceAccount
+  namespace: #@ data.values.namespace
+
+#@ mutating_webhook = overlay.subset({"kind":"MutatingWebhookConfiguration"})
+#@ validating_webhook = overlay.subset({"kind":"ValidatingWebhookConfiguration"})
+
+#@overlay/match by=overlay.or_op(mutating_webhook, validating_webhook), expects=2
+---
+webhooks:
+#@overlay/match by="name"
+- name: webhook.cert-manager.io
+  clientConfig:
+    service:
+      namespace: #@ data.values.namespace
+
+#@overlay/match by=overlay.or_op(mutating_webhook, validating_webhook), expects=2
+---
+metadata:
+  annotations:
+    #@overlay/match missing_ok=True
+    cert-manager.io/inject-ca-from-secret: #@ "{}/cert-manager-webhook-ca".format(data.values.namespace)

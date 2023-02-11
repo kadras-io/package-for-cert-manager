@@ -1,0 +1,67 @@
+# High Availability (Webhook)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  replicas: 2
+status:
+  readyReplicas: 2
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+  labels:
+    app.kubernetes.io/name: webhook
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/component: "webhook"
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webhook
+      app.kubernetes.io/instance: cert-manager
+      app.kubernetes.io/component: "webhook"
+
+# Leader Election
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      containers:
+      - name: cert-manager-controller
+        args:
+          - --v=2
+          - --cluster-resource-namespace=$(POD_NAMESPACE)
+          - --leader-election-namespace=cert-manager
+          - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.11.0
+          - --max-concurrent-challenges=60
+          - --leader-election-lease-duration=30s
+          - --leader-election-renew-deadline=20s
+          - --leader-election-retry-period=10s
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      containers:
+      - name: cert-manager-cainjector
+        args:
+          - --v=2
+          - --leader-election-namespace=cert-manager
+          - --leader-election-lease-duration=30s
+          - --leader-election-renew-deadline=20s
+          - --leader-election-retry-period=10s

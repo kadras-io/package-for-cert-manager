@@ -1,0 +1,22 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-controller
+          env:
+          #@ if/end data.values.proxy.http_proxy != "":
+          - name: HTTP_PROXY
+            value: #@ data.values.proxy.http_proxy
+          #@ if/end data.values.proxy.https_proxy != "":
+          - name: HTTPS_PROXY
+            value: #@ data.values.proxy.https_proxy
+          #@ if/end data.values.proxy.no_proxy != "":
+          - name: NO_PROXY
+            value: #@ data.values.proxy.no_proxy   

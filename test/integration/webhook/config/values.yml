@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-manager-values
+  namespace: tests
+stringData:
+  values.yaml: |
+    webhook:
+      host_network: true
+      secure_port: 10251

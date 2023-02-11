@@ -1,5 +1,45 @@
 #@data/values-schema
 
 ---
-#@schema/desc "The namespace in which to deploy Cert Manager"
+#@schema/desc "The namespace in which to deploy Cert Manager."
 namespace: cert-manager
+
+#@schema/desc "Settings for the Kyverno policies."
+policies:
+  #@schema/desc "Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation."
+  include: false
+
+#@schema/desc "Settings for configuring a private CA out-of-the-box."
+private_ca:
+  #@schema/desc "Whether to bootstrap a private CA."
+  enable: true
+
+#@schema/desc "Settings for the proxy."
+proxy:
+  #@schema/desc "The HTTP proxy URL."
+  http_proxy: ""
+  #@schema/desc "The HTTPS proxy URL."
+  https_proxy: ""
+  #@schema/desc "For which domains the proxy should not be used."
+  no_proxy: ""
+
+#@schema/desc "Settings for the cert-manager webhook."
+webhook:
+  #@schema/desc "The number of replicas. In order to enable high availability, it should be greater than 1."
+  #@schema/validation min=1
+  replicas: 1
+  #@schema/desc "Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks."
+  host_network: false
+  #@schema/desc "The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks."
+  secure_port: 10250
+
+#@schema/desc "Leader election configuration for the cert-manager and cert-manager-cainjector Deployments."
+leader_election:
+  #@schema/desc "Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility/#gke."
+  namespace: kube-system
+  #@schema/desc "The duration that non-leader candidates will wait after observing a leadership renewal until attempting to acquire leadership of a led but unrenewed leader slot. This is effectively the maximum duration that a leader can be stopped before it is replaced by another candidate."
+  lease_duration: "60s"
+  #@schema/desc "The interval between attempts by the acting leader to renew a leadership slot before it stops leading."
+  renew_deadline: "40s"
+  #@schema/desc "The duration the clients should wait between attempting acquisition and renewal of a leadership."
+  retry_period: "15s"

@@ -1,12 +1,31 @@
-# Use ytt to generate an OpenAPI specification
-schema:
-	ytt -f package/config/values-schema.yml --data-values-schema-inspect -o openapi-v3 > package/config/schema-openapi.yml
+K8S_VERSION=v1.26
 
-# Check the ytt-annotated Kubernetes configuration
-test-config:
+# Build package configuration
+build: package
+	cd package && kctrl package init
+
+# Prepare cluster for development workflow
+prepare: test/setup
+	ytt -f test/setup/assets/namespace.yml | kapp deploy -a ns -f- -y
+	ytt -f test/setup/assets/rbac.yml | kapp deploy -a rbac -f- -y
+	kubectl config set-context --current --namespace=tests
+
+# Inner development loop
+dev: package
+	cd package && kctrl dev -f package-resources.yml --local -y
+
+# Process the configuration manifests with ytt
+ytt:
 	ytt --file package/config
 
-# Run package tests
-test-integration: test/test.sh
-	chmod +x test/test.sh
-	./test/test.sh
+# Use ytt to generate an OpenAPI specification
+schema:
+	ytt -f package/config/values-schema.yml --data-values-schema-inspect -o openapi-v3 > schema-openapi.yml
+
+# Check the ytt-annotated Kubernetes configuration and its validation
+test-config:
+	ytt -f package/config | kubeconform -ignore-missing-schemas -summary
+
+# Run package integration tests
+test-integration: test/integration
+	kubectl kuttl test --config test/integration/kuttl-test.yml --kind-config test/setup/kind/$(K8S_VERSION)/kind-config.yml

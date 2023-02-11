@@ -1,10 +1,16 @@
 # Cert Manager
 
-<a href="https://slsa.dev/spec/v0.1/levels"><img src="https://slsa.dev/images/gh-badge-level3.svg" alt="The SLSA Level 3 badge"></a>
+![Test Workflow](https://github.com/kadras-io/package-for-cert-manager/actions/workflows/test.yml/badge.svg)
+![Release Workflow](https://github.com/kadras-io/package-for-cert-manager/actions/workflows/release.yml/badge.svg)
+[![The SLSA Level 3 badge](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev/spec/v0.1/levels)
+[![The Apache 2.0 license badge](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Follow us on Twitter](https://img.shields.io/static/v1?label=Twitter&message=Follow&color=1DA1F2)](https://twitter.com/kadrasIO)
 
-This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs/latest/packaging) for [Cert Manager](https://cert-manager.io), a cloud-native solution to automatically provision and manage TLS certificates in Kubernetes.
+A Carvel package for [Cert Manager](https://cert-manager.io), a cloud-native solution to automatically provision and manage X.509 certificates in Kubernetes.
 
-## Prerequisites
+## 🚀&nbsp; Getting Started
+
+### Prerequisites
 
 * Kubernetes 1.24+
 * Carvel [`kctrl`](https://carvel.dev/kapp-controller/docs/latest/install/#installing-kapp-controller-cli-kctrl) CLI.
@@ -12,108 +18,127 @@ This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs
 
   ```shell
   kapp deploy -a kapp-controller -y \
-    -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+    -f https://github.com/carvel-dev/kapp-controller/releases/latest/download/release.yml
   ```
 
-## Installation
+### Installation
 
-First, add the [Kadras package repository](https://github.com/kadras-io/kadras-packages) to your Kubernetes cluster.
+Add the Kadras [package repository](https://github.com/kadras-io/kadras-packages) to your Kubernetes cluster:
 
   ```shell
   kubectl create namespace kadras-packages
-  kctrl package repository add -r kadras-repo \
+  kctrl package repository add -r kadras-packages \
     --url ghcr.io/kadras-io/kadras-packages \
     -n kadras-packages
   ```
 
-Then, install the Cert Manager package.
+<details><summary>Installation without package repository</summary>
+The recommended way of installing the Cert Manager package is via the Kadras <a href="https://github.com/kadras-io/kadras-packages">package repository</a>. If you prefer not using the repository, you can add the package definition directly using <a href="https://carvel.dev/kapp/docs/latest/install"><code>kapp</code></a> or <code>kubectl</code>.
+
+  ```shell
+  kubectl create namespace cert-manager
+  kapp deploy -a cert-manager-package -n kadras-packages -y \
+    -f https://github.com/kadras-io/package-for-cert-manager/releases/latest/download/metadata.yml \
+    -f https://github.com/kadras-io/package-for-cert-manager/releases/latest/download/package.yml
+  ```
+</details>
+
+Install the Cert Manager package:
 
   ```shell
   kctrl package install -i cert-manager \
     -p cert-manager.packages.kadras.io \
-    -v 1.11.0 \
+    -v ${VERSION} \
     -n kadras-packages
   ```
 
-### Verification
+> **Note**
+> You can find the `${VERSION}` value by retrieving the list of package versions available in the Kadras package repository installed on your cluster.
+> 
+>   ```shell
+>   kctrl package available list -p cert-manager.packages.kadras.io -n kadras-packages
+>   ```
 
-You can verify the list of installed Carvel packages and their status.
+Verify the installed packages and their status:
 
   ```shell
   kctrl package installed list -n kadras-packages
   ```
 
-### Version
+## 📙&nbsp; Documentation
 
-You can get the list of Cert Manager versions available in the Kadras package repository.
+Documentation, tutorials and examples for this package are available in the [docs](docs) folder.
+For documentation specific to Cert Manager, check out [cert-manager.io](https://cert-manager.io).
 
-  ```shell
-  kctrl package available list -p cert-manager.packages.kadras.io -n kadras-packages
+## 🎯&nbsp; Configuration
+
+The Cert Manager package can be customized via a `values.yml` file.
+
+  ```yaml
+  namespace: cert-manager
+  webhook:
+    replicas: 2
   ```
 
-## Configuration
+Reference the `values.yml` file from the `kctrl` command when installing or upgrading the package.
+
+  ```shell
+  kctrl package install -i cert-manager \
+    -p cert-manager.packages.kadras.io \
+    -v ${VERSION} \
+    -n kadras-packages \
+    --values-file values.yml
+  ```
+
+### Values
+
+The Cert Manager package has the following configurable properties.
+
+<details><summary>Configurable properties</summary>
 
 The Cert Manager package has the following configurable properties.
 
 | Config | Default | Description |
 |--------|---------|-------------|
 | `namespace` | `cert-manager` | The namespace in which to deploy Cert Manager. |
+| `policies.include` | `false` | Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation. |
+| `private_ca.enable` | `true` | Whether to bootstrap a private CA. |
 
-You can define your configuration in a `values.yml` file.
+Settings for the proxy.
 
-  ```yaml
-  namespace: cert-manager
-  ```
+| Config | Default | Description |
+|--------|---------|-------------|
+| `proxy.http_proxy` | `""` | The HTTP proxy URL. |
+| `proxy.https_proxy` | `""` | The HTTPS proxy URL. |
+| `proxy.no_proxy` | `""` | For which domains the proxy should not be used. |
 
-Then, pass the file when installing the package.
+Settings for the cert-manager webhook.
 
-  ```shell
-  kctrl package install -i cert-manager \
-    -p cert-manager.packages.kadras.io \
-    -v 1.11.0 \
-    -n kadras-packages \
-    --values-file values.yml
-  ```
+| Config | Default | Description |
+|--------|---------|-------------|
+| `webhook.replicas` | `1` | The number of replicas. In order to enable high availability, it should be greater than 1. |
+| `webhook.host_network` | `false` | Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
+| `webhook.secure_port` | `10250` | The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
 
-## Upgrading
+Leader election configuration for the cert-manager and cert-manager-cainjector Deployments.
 
-You can upgrade an existing package to a newer version using `kctrl`.
+| Config | Default | Description |
+|--------|---------|-------------|
+| `leader_election.namespace` | `kube-system` | Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility/#gke. |
+| `leader_election.lease_duration` | `60s` | The duration that non-leader candidates will wait after observing a leadership renewal until attempting to acquire leadership of a led but unrenewed leader slot. This is effectively the maximum duration that a leader can be stopped before it is replaced by another candidate. |
+| `leader_election.renew_deadline` | `40s` | The interval between attempts by the acting leader to renew a leadership slot before it stops leading. |
+| `leader_election.retry_period` | `15s` | The duration the clients should wait between attempting acquisition and renewal of a leadership. |
 
-  ```shell
-  kctrl package installed update -i cert-manager \
-    -v <new-version> \
-    -n kadras-packages
-  ```
+</details>
 
-You can also update an existing package with a newer `values.yml` file.
+## 🛡️&nbsp; Security
 
-  ```shell
-  kctrl package installed update -i cert-manager \
-    -n kadras-packages \
-    --values-file values.yml
-  ```
+The security process for reporting vulnerabilities is described in [SECURITY.md](SECURITY.md).
 
-## Other
+## 🖊️&nbsp; License
 
-The recommended way of installing the Cert Manager package is via the [Kadras package repository](https://github.com/kadras-io/kadras-packages). If you prefer not using the repository, you can install the package by creating the necessary Carvel `PackageMetadata` and `Package` resources directly using [`kapp`](https://carvel.dev/kapp/docs/latest/install) or `kubectl`.
+This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for more information.
 
-  ```shell
-  kubectl create namespace kadras-packages
-  kapp deploy -a cert-manager-package -n kadras-packages -y \
-    -f https://github.com/kadras-io/package-for-cert-manager/releases/latest/download/metadata.yml \
-    -f https://github.com/kadras-io/package-for-cert-manager/releases/latest/download/package.yml
-  ```
+## 🙏&nbsp; Acknowledgments
 
-## Support and Documentation
-
-For support and documentation specific to Cert Manager, check out [cert-manager.io](https://cert-manager.io).
-
-## References
-
-This package is based on the original Cert Manager package used in [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) before its retirement.
-
-## Supply Chain Security
-
-This project is compliant with level 3 of the [SLSA Framework](https://slsa.dev).
-
-<img src="https://slsa.dev/images/SLSA-Badge-full-level3.svg" alt="The SLSA Level 3 badge" width=200>
+This package is inspired by the original Cert Manager package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
