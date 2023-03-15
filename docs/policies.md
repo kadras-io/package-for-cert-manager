@@ -1,12 +1,10 @@
 # Policies
 
-Validate and secure the Cert Manager installation.
+Validate and secure the package installation.
 
 ## Kyverno
 
-This package provides an optional set of out-of-the-box policies to validate and secure the Cert Manager installation and functionality. The policies requires [Kyverno](https://kyverno.io) to be installed in your Kubernetes cluster.
-
-The following configuration instructs the package to include the set of Kyverno policies.
+This package provides an optional set of out-of-the-box policies to validate and secure the package installation and its functionality. The policies requires [Kyverno](https://kyverno.io) to be installed in your Kubernetes cluster.
 
 ```yaml
 policies:

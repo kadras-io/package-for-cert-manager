@@ -12,20 +12,26 @@ The result:
 
 ```shell
 📦 Supply Chain Security Related artifacts for an image: ghcr.io/kadras-io/package-for-cert-manager
-└── 💾 Attestations for an image tag: ghcr.io/kadras-io/package-for-cert-manager:sha256-76d5d060d8a864933699715d29ef3fdc805378ed47600e029b03aadad020e77e.att
-   └── 🍒 sha256:2daae1cfdfb38b1a51cb7f273cac0081a2216017e4db5f78b4e1430fabcd99d1
-└── 🔐 Signatures for an image tag: ghcr.io/kadras-io/package-for-cert-manager:sha256-76d5d060d8a864933699715d29ef3fdc805378ed47600e029b03aadad020e77e.sig
-   └── 🍒 sha256:7390da18a629450c393c8ee9a9712e8bc27f1fbfedbd07312e54f57e9a6be5d5
+└── 💾 Attestations for an image tag: ghcr.io/kadras-io/package-for-cert-manager:sha256-3cc778ffeb099e827e357518ea32e4e4b5688ea1ef947270139732bb8719c355.att
+   └── 🍒 sha256:050052870dc08a4d59d9c59189d14f02c17e89e5c75e17b429263484190dfda5
+└── 🔐 Signatures for an image tag: ghcr.io/kadras-io/package-for-cert-manager:sha256-3cc778ffeb099e827e357518ea32e4e4b5688ea1ef947270139732bb8719c355.sig
+   └── 🍒 sha256:84b91f7dab26d39bf107e0b631f24baf3a6e74c13496a7e4ad0d314f21f784d4
 ```
 
 You can verify the signature and its claims:
 
 ```shell
-COSIGN_EXPERIMENTAL=1 cosign verify ghcr.io/kadras-io/package-for-cert-manager | jq
+cosign verify \
+   --certificate-identity-regexp https://github.com/kadras-io \
+   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+   ghcr.io/kadras-io/package-for-cert-manager | jq
 ```
 
 You can also verify the SLSA Provenance attestation associated with the image.
 
 ```shell
-COSIGN_EXPERIMENTAL=1 cosign verify-attestation --type slsaprovenance ghcr.io/kadras-io/package-for-cert-manager | jq .payload -r | base64 --decode | jq
+cosign verify-attestation --type slsaprovenance \
+   --certificate-identity-regexp https://github.com/slsa-framework \
+   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+   ghcr.io/kadras-io/package-for-cert-manager | jq .payload -r | base64 --decode | jq
 ```
