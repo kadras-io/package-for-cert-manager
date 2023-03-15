@@ -14,6 +14,10 @@ prepare: test/setup
 dev: package
 	cd package && kctrl dev -f package-resources.yml --local -y
 
+# Clean development environment
+clean:
+	cd package && kctrl dev -f package-resources.yml --local -y --delete 
+
 # Process the configuration manifests with ytt
 ytt:
 	ytt --file package/config

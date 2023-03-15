@@ -2,6 +2,7 @@
 
 ---
 #@schema/desc "The namespace in which to deploy Cert Manager."
+#@schema/validation min_len=1
 namespace: cert-manager
 
 #@schema/desc "Settings for the Kyverno policies."
@@ -36,10 +37,14 @@ webhook:
 #@schema/desc "Leader election configuration for the cert-manager and cert-manager-cainjector Deployments."
 leader_election:
   #@schema/desc "Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility/#gke."
+  #@schema/validation min_len=1
   namespace: kube-system
   #@schema/desc "The duration that non-leader candidates will wait after observing a leadership renewal until attempting to acquire leadership of a led but unrenewed leader slot. This is effectively the maximum duration that a leader can be stopped before it is replaced by another candidate."
+  #@schema/validation min_len=2
   lease_duration: "60s"
   #@schema/desc "The interval between attempts by the acting leader to renew a leadership slot before it stops leading."
+  #@schema/validation min_len=2
   renew_deadline: "40s"
   #@schema/desc "The duration the clients should wait between attempting acquisition and renewal of a leadership."
+  #@schema/validation min_len=2
   retry_period: "15s"
