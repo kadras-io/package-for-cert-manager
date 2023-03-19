@@ -96,8 +96,6 @@ The Cert Manager package has the following configurable properties.
 
 <details><summary>Configurable properties</summary>
 
-The Cert Manager package has the following configurable properties.
-
 | Config | Default | Description |
 |--------|---------|-------------|
 | `namespace` | `cert-manager` | The namespace in which to deploy Cert Manager. |

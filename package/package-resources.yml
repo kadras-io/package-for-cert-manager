@@ -7,7 +7,7 @@ spec:
   licenses:
   - Apache 2.0
   refName: cert-manager.packages.kadras.io
-  releaseNotes: https://github.com/jetstack/cert-manager/releases
+  releaseNotes: https://github.com/kadras-io/package-for-cert-manager/releases
   releasedAt: null
   template:
     spec:
