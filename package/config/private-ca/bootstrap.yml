@@ -1,7 +1,5 @@
 #@ load("@ytt:data", "data")
 
-#@ if data.values.private_ca.enable:
-
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -41,5 +39,3 @@ metadata:
 spec:
   ca:
     secretName: kadras-root-ca
-
-#@ end
