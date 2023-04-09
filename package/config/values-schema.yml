@@ -10,11 +10,6 @@ policies:
   #@schema/desc "Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation."
   include: false
 
-#@schema/desc "Settings for configuring a private CA out-of-the-box."
-private_ca:
-  #@schema/desc "Whether to bootstrap a private CA."
-  enable: true
-
 #@schema/desc "Settings for the proxy."
 proxy:
   #@schema/desc "The HTTP proxy URL."
