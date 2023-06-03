@@ -6,7 +6,7 @@
 [![The Apache 2.0 license badge](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Follow us on Twitter](https://img.shields.io/static/v1?label=Twitter&message=Follow&color=1DA1F2)](https://twitter.com/kadrasIO)
 
-A Carvel package for [Cert Manager](https://cert-manager.io), a cloud-native solution to automatically provision and manage X.509 certificates in Kubernetes.
+A Carvel package for [cert-manager](https://cert-manager.io), a cloud-native solution to automatically provision and manage X.509 certificates in Kubernetes.
 
 ## 🚀&nbsp; Getting Started
 
@@ -33,7 +33,7 @@ Add the Kadras [package repository](https://github.com/kadras-io/kadras-packages
   ```
 
 <details><summary>Installation without package repository</summary>
-The recommended way of installing the Cert Manager package is via the Kadras <a href="https://github.com/kadras-io/kadras-packages">package repository</a>. If you prefer not using the repository, you can add the package definition directly using <a href="https://carvel.dev/kapp/docs/latest/install"><code>kapp</code></a> or <code>kubectl</code>.
+The recommended way of installing the cert-manager package is via the Kadras <a href="https://github.com/kadras-io/kadras-packages">package repository</a>. If you prefer not using the repository, you can add the package definition directly using <a href="https://carvel.dev/kapp/docs/latest/install"><code>kapp</code></a> or <code>kubectl</code>.
 
   ```shell
   kubectl create namespace kadras-packages
@@ -43,7 +43,7 @@ The recommended way of installing the Cert Manager package is via the Kadras <a 
   ```
 </details>
 
-Install the Cert Manager package:
+Install the cert-manager package:
 
   ```shell
   kctrl package install -i cert-manager \
@@ -68,11 +68,11 @@ Verify the installed packages and their status:
 ## 📙&nbsp; Documentation
 
 Documentation, tutorials and examples for this package are available in the [docs](docs) folder.
-For documentation specific to Cert Manager, check out [cert-manager.io](https://cert-manager.io).
+For documentation specific to cert-manager, check out [cert-manager.io](https://cert-manager.io).
 
 ## 🎯&nbsp; Configuration
 
-The Cert Manager package can be customized via a `values.yml` file.
+The cert-manager package can be customized via a `values.yml` file.
 
   ```yaml
   namespace: cert-manager
@@ -92,13 +92,13 @@ Reference the `values.yml` file from the `kctrl` command when installing or upgr
 
 ### Values
 
-The Cert Manager package has the following configurable properties.
+The cert-manager package has the following configurable properties.
 
 <details><summary>Configurable properties</summary>
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `namespace` | `cert-manager` | The namespace in which to deploy Cert Manager. |
+| `namespace` | `cert-manager` | The namespace in which to deploy cert-manager. |
 | `policies.include` | `false` | Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation. |
 
 Settings for the proxy.
@@ -138,4 +138,4 @@ This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE
 
 ## 🙏&nbsp; Acknowledgments
 
-This package is inspired by the original Cert Manager package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
+This package is inspired by the original cert-manager package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
