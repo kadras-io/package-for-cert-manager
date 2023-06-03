@@ -1,0 +1,18 @@
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Config
+searchRules:
+  # Resolves the image references passed via environment variables.
+  - keyMatcher:
+      path:
+        - spec
+        - template
+        - spec
+        - containers
+        - {allIndexes: true}
+        - env
+        - {allIndexes: true}
+        - value
+  # Resolves the image references from the specified OCI repository.
+  - valueMatcher:
+      imageRepo: quay.io/jetstack

@@ -1,7 +1,7 @@
 #@data/values-schema
 
 ---
-#@schema/desc "The namespace in which to deploy Cert Manager."
+#@schema/desc "The namespace in which to deploy cert-manager."
 #@schema/validation min_len=1
 namespace: cert-manager
 
@@ -10,13 +10,13 @@ policies:
   #@schema/desc "Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation."
   include: false
 
-#@schema/desc "Settings for the proxy."
+#@schema/desc "Settings for the corporate proxy."
 proxy:
-  #@schema/desc "The HTTP proxy URL."
-  http_proxy: ""
-  #@schema/desc "The HTTPS proxy URL."
+  #@schema/desc "The HTTPS proxy to use for network traffic."
   https_proxy: ""
-  #@schema/desc "For which domains the proxy should not be used."
+  #@schema/desc "The HTTP proxy to use for network traffic."
+  http_proxy: ""
+  #@schema/desc "A comma-separated list of hostnames, IP addresses, or IP ranges in CIDR format that should not use the proxy."
   no_proxy: ""
 
 #@schema/desc "Settings for the cert-manager webhook."

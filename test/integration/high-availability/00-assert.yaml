@@ -43,7 +43,7 @@ spec:
           - --v=2
           - --cluster-resource-namespace=$(POD_NAMESPACE)
           - --leader-election-namespace=cert-manager
-          - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.11.1
+          - --acme-http01-solver-image=$(CERT_MANAGER_ACMESOLVER_IMAGE)
           - --max-concurrent-challenges=60
           - --leader-election-lease-duration=30s
           - --leader-election-renew-deadline=20s

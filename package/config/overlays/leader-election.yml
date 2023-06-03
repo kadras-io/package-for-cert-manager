@@ -3,6 +3,8 @@
 
 #! The cert-manager controller and cainjector rely on an active/passive leader election strategy.
 #! The namespace used by the leader election can be configured.
+#! In some cloud environments like GKE, the namespace used by the leader election requires changing.
+#! See: https://cert-manager.io/docs/installation/compatibility.
 
 #@overlay/match by=overlay.subset({"metadata":{"namespace":"kube-system"}}), expects=4
 ---

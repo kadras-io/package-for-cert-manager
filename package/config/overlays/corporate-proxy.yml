@@ -6,7 +6,6 @@
 spec:
   template:
     spec:
-      #@overlay/match missing_ok=True
       containers:
         #@overlay/match by="name"
         - name: cert-manager-controller
