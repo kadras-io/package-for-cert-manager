@@ -10,4 +10,4 @@ For more information, check the Cert Manager documentation for [metrics](https:/
 
 ## Dashboards
 
-If you use the Grafana observability stack, you can refer to this [dashboard](https://gitlab.com/uneeq-oss/cert-manager-mixin) as a foundation to build your own.
+If you use the Grafana observability stack, you can refer to this [dashboard](https://gitlab.com/uneeq-oss/cert-manager-mixin/-/blob/master/dashboards/cert-manager.json) as a foundation to build your own.
