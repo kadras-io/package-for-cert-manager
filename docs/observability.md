@@ -2,6 +2,24 @@
 
 Monitor and observe the operation of cert-manager using metrics.
 
+## Logs
+
+The log verbosity for all cert-manager containers can be configured.
+
+For the controllers:
+
+```yaml
+controller:
+  loglevel: 2
+```
+
+For the webhook:
+
+```yaml
+webhook:
+  loglevel: 2
+```
+
 ## Metrics
 
 The cert-manager controller produces Prometheus metrics by default. This package comes pre-configured with the necessary annotations to let Prometheus scrape metrics automatically from the cert-manager controller.

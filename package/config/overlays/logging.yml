@@ -1,0 +1,38 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-controller
+          args:
+            #@overlay/match by=lambda i,l,r: l.startswith("--v=")
+            - #@ "--v={}".format(data.values.controller.loglevel)
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-cainjector"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-cainjector
+          args:
+            #@overlay/match by=lambda i,l,r: l.startswith("--v=")
+            - #@ "--v={}".format(data.values.controller.loglevel)
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-webhook"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-webhook
+          args:
+            #@overlay/match by=lambda i,l,r: l.startswith("--v=")
+            - #@ "--v={}".format(data.values.webhook.loglevel)

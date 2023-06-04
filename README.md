@@ -113,12 +113,14 @@ Settings for the cert-manager controller.
 
 | Config | Default | Description |
 |--------|---------|-------------|
+| `controller.loglevel` | `2` | Number of the log level verbosity. |
 | `controller.probes.enabled` | `false` | Whether to enable to optional probes on the cert-manager controller. It's recommended not to enable this unless you encounter issues with the controller Pods not restarting correctly. More information: https://github.com/cert-manager/cert-manager/pull/5962. |
 
 Settings for the cert-manager webhook.
 
 | Config | Default | Description |
 |--------|---------|-------------|
+| `webhook.loglevel` | `2` | Number of the log level verbosity. |
 | `webhook.replicas` | `1` | The number of replicas. In order to enable high availability, it should be greater than 1. |
 | `webhook.host_network` | `false` | Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
 | `webhook.secure_port` | `10250` | The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
