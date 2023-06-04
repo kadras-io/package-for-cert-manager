@@ -1,4 +1,4 @@
-# Cert Manager
+# cert-manager
 
 ![Test Workflow](https://github.com/kadras-io/package-for-cert-manager/actions/workflows/test.yml/badge.svg)
 ![Release Workflow](https://github.com/kadras-io/package-for-cert-manager/actions/workflows/release.yml/badge.svg)
@@ -101,13 +101,19 @@ The cert-manager package has the following configurable properties.
 | `namespace` | `cert-manager` | The namespace in which to deploy cert-manager. |
 | `policies.include` | `false` | Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation. |
 
-Settings for the proxy.
+Settings for the corporate proxy.
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `proxy.http_proxy` | `""` | The HTTP proxy URL. |
-| `proxy.https_proxy` | `""` | The HTTPS proxy URL. |
-| `proxy.no_proxy` | `""` | For which domains the proxy should not be used. |
+| `proxy.http_proxy` | `""` | The HTTPS proxy to use for network traffic. |
+| `proxy.https_proxy` | `""` | The HTTP proxy to use for network traffic. |
+| `proxy.no_proxy` | `""` | A comma-separated list of hostnames, IP addresses, or IP ranges in CIDR format that should not use the proxy. |
+
+Settings for the cert-manager controller.
+
+| Config | Default | Description |
+|--------|---------|-------------|
+| `controller.probes.enabled` | `false` | Whether to enable to optional probes on the cert-manager controller. It's recommended not to enable this unless you encounter issues with the controller Pods not restarting correctly. More information: https://github.com/cert-manager/cert-manager/pull/5962. |
 
 Settings for the cert-manager webhook.
 

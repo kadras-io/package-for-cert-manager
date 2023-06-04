@@ -1,12 +1,12 @@
 # Configuring Observability
 
-Monitor and observe the operation of Cert Manager using metrics.
+Monitor and observe the operation of cert-manager using metrics.
 
 ## Metrics
 
-The Cert Manager controller produces Prometheus metrics by default. This package comes pre-configured with the necessary annotations to let Prometheus scrape metrics automatically from the Cert Manager controller.
+The cert-manager controller produces Prometheus metrics by default. This package comes pre-configured with the necessary annotations to let Prometheus scrape metrics automatically from the cert-manager controller.
 
-For more information, check the Cert Manager documentation for [metrics](https://cert-manager.io/docs/usage/prometheus-metrics).
+For more information, check the cert-manager documentation for [metrics](https://cert-manager.io/docs/usage/prometheus-metrics).
 
 ## Dashboards
 

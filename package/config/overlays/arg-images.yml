@@ -19,5 +19,4 @@ spec:
               value: quay.io/jetstack/cert-manager-acmesolver:v1.12.1
           args:
             - #@overlay/match by=lambda i,l,r: l.startswith("--acme-http01-solver-image")
-              #@overlay/replace
               --acme-http01-solver-image=$(CERT_MANAGER_ACMESOLVER_IMAGE)

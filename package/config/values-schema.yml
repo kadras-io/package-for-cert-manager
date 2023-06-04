@@ -19,6 +19,13 @@ proxy:
   #@schema/desc "A comma-separated list of hostnames, IP addresses, or IP ranges in CIDR format that should not use the proxy."
   no_proxy: ""
 
+#@schema/desc "Settings for the cert-manager controller."
+controller:
+  #@schema/desc "Settings for the cert-manager controller probes."
+  probes:
+    #@schema/desc "Whether to enable to optional probes on the cert-manager controller. It's recommended not to enable this unless you encounter issues with the controller Pods not restarting correctly. More information: https://github.com/cert-manager/cert-manager/pull/5962."
+    enabled: false
+
 #@schema/desc "Settings for the cert-manager webhook."
 webhook:
   #@schema/desc "The number of replicas. In order to enable high availability, it should be greater than 1."
