@@ -2,8 +2,8 @@
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
 
-#! Search rules specify custom strategies for kbld to identify references for container images.
-#! See more about the search rules: https://carvel.dev/kbld/docs/latest/config/#search-rules.
+# Search rules specify custom strategies for kbld to identify references for container images.
+# See more about the search rules: https://carvel.dev/kbld/docs/latest/config/#search-rules.
 searchRules:
   
   # Resolves the image references from the specified OCI repository.
