@@ -8,7 +8,7 @@
 #@ mutating_webhook = overlay.subset({"apiVersion":"admissionregistration.k8s.io/v1", "kind":"MutatingWebhookConfiguration"})
 #@ validating_webhook = overlay.subset({"apiVersion":"admissionregistration.k8s.io/v1", "kind":"ValidatingWebhookConfiguration"})
 
-#@overlay/match by=overlay.or_op(mutating_webhook,validating_webhook), expects="2+"
+#@overlay/match by=overlay.or_op(mutating_webhook,validating_webhook), expects=2
 ---
 metadata:
   #@overlay/match missing_ok=True

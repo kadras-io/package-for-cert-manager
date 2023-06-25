@@ -1,6 +1,6 @@
 # Using a corporate proxy
 
-When running cert-manager behind a corporate proxy, you can configure the controller to proxy communications with external services.
+When running cert-manager behind a corporate proxy, you can configure the controller to proxy communications with external services (such as an ACME server).
 
 ```yaml
 proxy:
