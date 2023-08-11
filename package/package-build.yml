@@ -14,8 +14,8 @@ spec:
           - kapp:
               rawOptions:
               - --wait-timeout=5m
-              - --kube-api-qps=50
-              - --kube-api-burst=100
+              - --kube-api-qps=25
+              - --kube-api-burst=50
           template:
           - ytt:
               paths:
