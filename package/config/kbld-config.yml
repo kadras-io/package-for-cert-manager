@@ -6,6 +6,7 @@ kind: Config
 # See more about the search rules: https://carvel.dev/kbld/docs/latest/config/#search-rules.
 searchRules:
   
-  # Resolves the image references from the specified OCI repository.
-  - valueMatcher:
+  # Resolves the image references from the specified OCI repository,
+  # even when included in non-standard locations such as values in
+  # environment variables.  - valueMatcher:
       imageRepo: quay.io/jetstack/cert-manager-acmesolver
