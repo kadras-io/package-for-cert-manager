@@ -1,7 +1,0 @@
-# Policies - Kyverno
----
-apiVersion: kyverno.io/v1
-kind: Policy
-metadata:
-  name: cert-manager-verify-image
-  namespace: cert-manager
