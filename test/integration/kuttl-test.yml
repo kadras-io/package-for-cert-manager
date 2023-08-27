@@ -8,5 +8,17 @@ parallel: 1
 startKIND: true
 kindContext: integration
 kindNodeCache: true
-timeout: 120
+timeout: 180
 artifactsDir: /tmp/kuttl-artifacts
+commands:
+  - script: |
+      kapp deploy -a kapp-controller -y \
+        -f https://github.com/carvel-dev/kapp-controller/releases/latest/download/release.yml
+  - script: |
+      kubectl config set-context --current --namespace=tests && \
+      kapp deploy -a kyverno-package -y \
+        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.3/package.yml \
+        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.3/metadata.yml
+  - script: |
+      kubectl config set-context --current --namespace=tests && \
+      kapp deploy -a dependencies -y -f ./test/setup/dependencies
