@@ -4,7 +4,7 @@ directories:
   - githubRelease:
       disableAutoChecksumValidation: true
       slug: cert-manager/cert-manager
-      tag: v1.13.0
+      tag: v1.13.1
     includePaths:
     - cert-manager.yaml
     path: .
