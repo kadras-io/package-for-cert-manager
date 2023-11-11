@@ -17,8 +17,8 @@ commands:
   - script: |
       kubectl config set-context --current --namespace=tests && \
       kapp deploy -a kyverno-package -y \
-        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.3%2Bkadras.1/package.yml \
-        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.3%2Bkadras.1/metadata.yml
+        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.4/package.yml \
+        -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.10.4/metadata.yml
   - script: |
       kubectl config set-context --current --namespace=tests && \
       kapp deploy -a dependencies -y -f ./test/setup/dependencies
