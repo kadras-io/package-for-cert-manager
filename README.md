@@ -113,7 +113,6 @@ Settings for the cert-manager controller.
 | Config | Default | Description |
 |--------|---------|-------------|
 | `controller.loglevel` | `2` | Number of the log level verbosity. |
-| `controller.probes.enabled` | `false` | Whether to enable to optional probes on the cert-manager controller. It's recommended not to enable this unless you encounter issues with the controller Pods not restarting correctly. More information: https://github.com/cert-manager/cert-manager/pull/5962. |
 
 Settings for the cert-manager webhook.
 
