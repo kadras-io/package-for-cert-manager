@@ -141,7 +141,3 @@ The security process for reporting vulnerabilities is described in [SECURITY.md]
 ## 🖊️&nbsp; License
 
 This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for more information.
-
-## 🙏&nbsp; Acknowledgments
-
-This package is inspired by the original cert-manager package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
