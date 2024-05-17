@@ -50,4 +50,7 @@ spec:
                 sVcRHHDitVt8oO/x4Wus1c0CAwEAAQ==
                 -----END PUBLIC KEY-----
               signatureAlgorithm: sha512
+              rekor:
+                url: https://rekor.sigstore.dev
+                ignoreTlog: true
 #@ end
