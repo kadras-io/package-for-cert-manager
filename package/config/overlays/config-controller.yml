@@ -18,10 +18,6 @@ logging:
   verbosity: #@ data.values.controller.loglevel
   format: text
 
-#! Some of the OCI images used by this package are defined as arguments to containers.
-#! We change the configuration to pass the image reference via configuration file
-#! so that can be discovered and its digest resolved by kbld. It's a pre-requisite for supporting
-#! package relocation to another registry and air-gapped scenarios.
 acmeHTTP01Config:
   solverImage: quay.io/jetstack/cert-manager-acmesolver:v1.15.0
 #@ end

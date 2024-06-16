@@ -5,9 +5,15 @@ kind: Config
 # Search rules specify custom strategies for kbld to identify references for container images.
 # See more about the search rules: https://carvel.dev/kbld/docs/latest/config/#search-rules.
 searchRules:
-  
-  # Resolves the image references from the specified OCI repository,
-  # even when included in non-standard locations such as values in
-  # environment variables.
-  - valueMatcher:
-      imageRepo: quay.io/jetstack/cert-manager-acmesolver
+
+  #! Some of the OCI images used by this package are defined as arguments to containers.
+  #! We change the configuration to pass the image reference via configuration file
+  #! so that can be discovered and its digest resolved by kbld. It's a pre-requisite for supporting
+  #! package relocation to another registry and air-gapped scenarios.
+  - keyMatcher:
+      name: config.yaml
+    updateStrategy:
+      yaml:
+        searchRules:
+          - keyMatcher:
+              path: [ acmeHTTP01Config, solverImage ]
