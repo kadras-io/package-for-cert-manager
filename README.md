@@ -74,11 +74,10 @@ For documentation specific to cert-manager, check out [cert-manager.io](https://
 The cert-manager package can be customized via a `values.yml` file.
 
   ```yaml
-  issuers:
-    letsencrypt:
-      include: true
-      production: true
-      email: security@example.net
+  letsencrypt:
+    include: true
+    production: true
+    email: security@example.net
   ```
 
 Reference the `values.yml` file from the `kctrl` command when installing or upgrading the package.
