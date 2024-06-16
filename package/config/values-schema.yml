@@ -56,18 +56,17 @@ leader_election:
   #@schema/validation min_len=1
   namespace: kube-system
 
-#@schema/desc "Issuers configuration"
-issuers:
-  #@schema/desc "Settings for default private PKI"
-  private:
-    #@schema/desc "Whether to include a ClusterIssuer for a private PKI."
-    include: true
-  #@schema/desc "Settings for Let's Encrypt."
-  letsencrypt:
-    #@schema/desc "Whether to include a ClusterIssuer for Let's Encrypt."
-    include: false
-    #@schema/desc "Whether to use Let's Encrypt staging (recommended for non-production environments) or production."
-    production: false
-    #@schema/desc "The email address that Let's Encrypt will use to send info on expiring certificates or other issues."
-    #@schema/validation min_len=5, when=lambda _, ctx: ctx.parent["include"]
-    email: ""
+#@schema/desc "Settings for the built-in, private PKI"
+private_pki:
+  #@schema/desc "Whether to include a ClusterIssuer for a private PKI."
+  include: true
+
+#@schema/desc "Settings for Let's Encrypt."
+letsencrypt:
+  #@schema/desc "Whether to include a ClusterIssuer for Let's Encrypt."
+  include: false
+  #@schema/desc "Whether to use Let's Encrypt staging (recommended for non-production environments) or production."
+  production: false
+  #@schema/desc "The email address that Let's Encrypt will use to send info on expiring certificates or other issues."
+  #@schema/validation min_len=5, when=lambda _, ctx: ctx.parent["include"]
+  email: ""

@@ -143,10 +143,10 @@ Issues configuration.
 
 | Config | Default | Description |
 |-------|-------------------|-------------|
-| `issuers.private.include` | `true` | Whether to include a ClusterIssuer for a private PKI. |
-| `issuers.letsencrypt.include` | `false` | Whether to include a ClusterIssuer for Let's Encrypt. |
-| `issuers.letsencrypt.production` | `false` | Whether to use Let's Encrypt staging (recommended for non-production environments) or production. |
-| `issuers.letsencrypt.email` | `""` | The email address that Let's Encrypt will use to send info on expiring certificates or other issues. |
+| `private_pki.include` | `true` | Whether to include a ClusterIssuer for a private PKI. |
+| `letsencrypt.include` | `false` | Whether to include a ClusterIssuer for Let's Encrypt. |
+| `letsencrypt.production` | `false` | Whether to use Let's Encrypt staging (recommended for non-production environments) or production. |
+| `letsencrypt.email` | `""` | The email address that Let's Encrypt will use to send info on expiring certificates or other issues. |
 
 </details>
 
