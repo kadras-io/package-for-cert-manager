@@ -1,6 +1,6 @@
 #@ load("@ytt:data", "data")
 
-#@ if data.values.issuers.private.include:
+#@ if data.values.private_pki.include:
 
 ---
 apiVersion: cert-manager.io/v1

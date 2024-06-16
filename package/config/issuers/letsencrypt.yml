@@ -1,6 +1,6 @@
 #@ load("@ytt:data","data")
 
-#@ if/end data.values.issuers.letsencrypt.include and not data.values.issuers.letsencrypt.production:
+#@ if/end data.values.letsencrypt.include and not data.values.letsencrypt.production:
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -17,7 +17,7 @@ spec:
         ingress:
           ingressClassName: contour
 
-#@ if/end data.values.issuers.letsencrypt.include and data.values.issuers.letsencrypt.production:
+#@ if/end data.values.letsencrypt.include and data.values.letsencrypt.production:
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
