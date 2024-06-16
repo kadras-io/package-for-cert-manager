@@ -6,10 +6,9 @@ metadata:
   namespace: tests
 stringData:
   values.yaml: |
-    leader_election:
-      namespace: cert-manager
-      lease_duration: "30s"
-      renew_deadline: "20s"
-      retry_period: "10s"
-    webhook:
+    controller:
       replicas: 2
+    cainjector:
+      replicas: 2
+    webhook:
+      replicas: 3

@@ -74,9 +74,11 @@ For documentation specific to cert-manager, check out [cert-manager.io](https://
 The cert-manager package can be customized via a `values.yml` file.
 
   ```yaml
-  namespace: cert-manager
-  webhook:
-    replicas: 2
+  issuers:
+    letsencrypt:
+      include: true
+      production: true
+      email: security@example.net
   ```
 
 Reference the `values.yml` file from the `kctrl` command when installing or upgrading the package.
@@ -113,24 +115,38 @@ Settings for the cert-manager controller.
 | Config | Default | Description |
 |--------|---------|-------------|
 | `controller.loglevel` | `2` | Number of the log level verbosity. |
+| `controller.replicas` | `1` | The number of replicas. In order to enable high availability, 2 replicas are recommended. |
+
+Settings for the cert-manager cainjector.
+
+| Config | Default | Description |
+|--------|---------|-------------|
+| `cainjector.loglevel` | `2` | Number of the log level verbosity. |
+| `cainjector.replicas` | `1` | The number of replicas. In order to enable high availability, 2 replicas are recommended. |
 
 Settings for the cert-manager webhook.
 
 | Config | Default | Description |
 |--------|---------|-------------|
 | `webhook.loglevel` | `2` | Number of the log level verbosity. |
-| `webhook.replicas` | `1` | The number of replicas. In order to enable high availability, it should be greater than 1. |
-| `webhook.host_network` | `false` | Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
-| `webhook.secure_port` | `10250` | The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility/#aws-eks. |
+| `webhook.replicas` | `1` | The number of replicas. In order to enable high availability, at least 3 replicas are recommended. |
+| `webhook.host_network` | `false` | Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility. |
+| `webhook.secure_port` | `6443` | The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility. |
 
-Leader election configuration for the cert-manager and cert-manager-cainjector Deployments.
+Leader election configuration for the cert-manager controller and cainjector Deployments.
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `leader_election.namespace` | `kube-system` | Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility/#gke. |
-| `leader_election.lease_duration` | `60s` | The duration that non-leader candidates will wait after observing a leadership renewal until attempting to acquire leadership of a led but unrenewed leader slot. This is effectively the maximum duration that a leader can be stopped before it is replaced by another candidate. |
-| `leader_election.renew_deadline` | `40s` | The interval between attempts by the acting leader to renew a leadership slot before it stops leading. |
-| `leader_election.retry_period` | `15s` | The duration the clients should wait between attempting acquisition and renewal of a leadership. |
+| `leader_election.namespace` | `kube-system` | Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility. |
+
+Issues configuration.
+
+| Config | Default | Description |
+|-------|-------------------|-------------|
+| `issuers.private.include` | `true` | Whether to include a ClusterIssuer for a private PKI. |
+| `issuers.letsencrypt.include` | `false` | Whether to include a ClusterIssuer for Let's Encrypt. |
+| `issuers.letsencrypt.production` | `false` | Whether to use Let's Encrypt staging (recommended for non-production environments) or production. |
+| `issuers.letsencrypt.email` | `""` | The email address that Let's Encrypt will use to send info on expiring certificates or other issues. |
 
 </details>
 

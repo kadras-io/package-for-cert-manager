@@ -1,0 +1,55 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+
+#@ def cainjector_config():
+---
+apiVersion: cainjector.config.cert-manager.io/v1alpha1
+kind: CAInjectorConfiguration
+
+leaderElectionConfig:
+  namespace: #@ data.values.leader_election.namespace
+
+logging:
+  verbosity: #@ data.values.cainjector.loglevel
+  format: text
+#@ end
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager-cainjector
+  namespace: #@ data.values.namespace
+  labels:
+    app: cainjector
+    app.kubernetes.io/name: cainjector
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/component: "cainjector"
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/versioned-keep-original: ""
+    kapp.k14s.io/num-versions: "5"
+data:
+  config.yaml: #@ yaml.encode(cainjector_config())
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-cainjector"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-cainjector
+          #@overlay/replace
+          args:
+            - --config=/var/cert-manager/config/config.yaml
+          #@overlay/match missing_ok=True
+          volumeMounts:
+            - name: config
+              mountPath: /var/cert-manager/config
+      #@overlay/match missing_ok=True
+      volumes:
+        - name: config
+          configMap:
+            name: cert-manager-cainjector

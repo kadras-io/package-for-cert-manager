@@ -6,16 +6,11 @@ Monitor and observe the operation of cert-manager using metrics.
 
 The log verbosity for all cert-manager containers can be configured.
 
-For the controllers:
-
 ```yaml
 controller:
   loglevel: 2
-```
-
-For the webhook:
-
-```yaml
+cainjector:
+  loglevel: 2
 webhook:
   loglevel: 2
 ```

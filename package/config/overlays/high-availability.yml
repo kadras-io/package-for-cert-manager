@@ -1,20 +1,21 @@
-# High Availability (controller)
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! CONTROLLER
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cert-manager
-  namespace: cert-manager
 spec:
-  replicas: 2
-status:
-  readyReplicas: 2
+  #@overlay/match missing_ok=True
+  replicas: #@ data.values.controller.replicas
+
+#@ if data.values.controller.replicas > 1:
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager
-  namespace: cert-manager
+  namespace: #@ data.values.namespace
   labels:
     app: cert-manager
     app.kubernetes.io/name: cert-manager
@@ -27,24 +28,23 @@ spec:
       app.kubernetes.io/name: cert-manager
       app.kubernetes.io/instance: cert-manager
       app.kubernetes.io/component: "controller"
+#@ end
 
-# High Availability (cainjector)
+#! CAINJECTOR
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-cainjector"}})
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cert-manager-cainjector
-  namespace: cert-manager
 spec:
-  replicas: 2
-status:
-  readyReplicas: 2
+  #@overlay/match missing_ok=True
+  replicas: #@ data.values.cainjector.replicas
+
+#@ if data.values.cainjector.replicas > 1:
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager-cainjector
-  namespace: cert-manager
+  namespace: #@ data.values.namespace
   labels:
     app: cainjector
     app.kubernetes.io/name: cainjector
@@ -57,24 +57,23 @@ spec:
       app.kubernetes.io/name: cainjector
       app.kubernetes.io/instance: cert-manager
       app.kubernetes.io/component: "cainjector"
+#@ end
 
-# High Availability (webhook)
+#! WEBHOOK
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-webhook"}})
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cert-manager-webhook
-  namespace: cert-manager
 spec:
-  replicas: 3
-status:
-  readyReplicas: 3
+  #@overlay/match missing_ok=True
+  replicas: #@ data.values.webhook.replicas
+
+#@ if data.values.webhook.replicas >= 2:
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager-webhook
-  namespace: cert-manager
+  namespace: #@ data.values.namespace
   labels:
     app: webhook
     app.kubernetes.io/name: webhook
@@ -87,3 +86,4 @@ spec:
       app.kubernetes.io/name: webhook
       app.kubernetes.io/instance: cert-manager
       app.kubernetes.io/component: "webhook"
+#@ end

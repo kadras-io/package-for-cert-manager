@@ -1,44 +1,3 @@
-# Private CA
-
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: kadras-bootstrap-issuer
-spec:
-  selfSigned: {}
-
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: kadras-root-ca
-spec:
-  isCA: true
-  commonName: Kadras CA
-  secretName: kadras-root-ca
-  duration: 8760h #! 365 days
-  renewBefore: 360h #! 15 days
-  subject:
-    organizations:
-    - Kadras
-  privateKey:
-    algorithm: Ed25519
-    encoding: PKCS8
-  issuerRef:
-    name: kadras-bootstrap-issuer
-    kind: Issuer
-    group: cert-manager.io
-
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: kadras-ca-issuer
-spec:
-  ca:
-    secretName: kadras-root-ca
-
 # Certificate
 ---
 apiVersion: cert-manager.io/v1
@@ -61,5 +20,4 @@ spec:
     - test.kadras.io
   issuerRef:
     name: kadras-ca-issuer
-    kind: Issuer
-    group: cert-manager.io
+    kind: ClusterIssuer

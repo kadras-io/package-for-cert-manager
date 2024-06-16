@@ -1,0 +1,66 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+
+#@ def controller_config():
+---
+apiVersion: controller.config.cert-manager.io/v1alpha1
+kind: ControllerConfiguration
+
+clusterResourceNamespace: #@ data.values.namespace
+
+leaderElectionConfig:
+  namespace: #@ data.values.leader_election.namespace
+
+maxConcurrentChallenges: 60
+
+logging:
+  verbosity: #@ data.values.controller.loglevel
+  format: text
+
+#! Some of the OCI images used by this package are defined as arguments to containers.
+#! We change the configuration to pass the image reference via configuration file
+#! so that can be discovered and its digest resolved by kbld. It's a pre-requisite for supporting
+#! package relocation to another registry and air-gapped scenarios.
+acmeHTTP01Config:
+  solverImage: quay.io/jetstack/cert-manager-acmesolver:v1.15.0
+#@ end
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager
+  namespace: #@ data.values.namespace
+  labels:
+    app: cert-manager
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/component: "controller"
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/versioned-keep-original: ""
+    kapp.k14s.io/num-versions: "5"
+data:
+  config.yaml: #@ yaml.encode(controller_config())
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-controller
+          #@overlay/replace
+          args:
+            - --config=/var/cert-manager/config/config.yaml
+          #@overlay/match missing_ok=True
+          volumeMounts:
+            - name: config
+              mountPath: /var/cert-manager/config
+      #@overlay/match missing_ok=True
+      volumes:
+        - name: config
+          configMap:
+            name: cert-manager

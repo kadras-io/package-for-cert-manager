@@ -1,0 +1,35 @@
+#@ load("@ytt:data","data")
+
+#@ if/end data.values.issuers.letsencrypt.include and not data.values.issuers.letsencrypt.production:
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-http01-issuer
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: #@ data.values.letsencrypt.email
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: contour
+
+#@ if/end data.values.issuers.letsencrypt.include and data.values.issuers.letsencrypt.production:
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod-http01-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: #@ data.values.letsencrypt.email
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: contour

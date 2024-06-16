@@ -25,4 +25,7 @@ metadata:
   namespace: tests
 stringData:
   values.yaml: |
-    # Default
+    optional_components:
+      background_controller: false
+      cleanup_controller: false
+      reports_controller: false
