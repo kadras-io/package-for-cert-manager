@@ -1,35 +1,43 @@
 #@ load("@ytt:data","data")
 
+#@ def get_solvers():
+#@ if/end data.values.letsencrypt.challenge.type == "http01":
+- http01:
+    ingress:
+      ingressClassName: contour
+#@ if/end data.values.letsencrypt.challenge.type == "dns01":
+- dns01:
+    #@ if/end data.values.letsencrypt.challenge.dns_provider == "digital_ocean":
+    digitalocean:
+      tokenSecretRef:
+        name: #@ data.values.letsencrypt.challenge.secret.name
+        key: #@ data.values.letsencrypt.challenge.secret.key
+#@ end
+
 #@ if/end data.values.letsencrypt.include and not data.values.letsencrypt.production:
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-staging-http01-issuer
+  name: letsencrypt-staging-issuer
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     email: #@ data.values.letsencrypt.email
     privateKeySecretRef:
       name: letsencrypt-staging
-    solvers:
-    - http01:
-        ingress:
-          ingressClassName: contour
+    solvers: #@ get_solvers()
 
 #@ if/end data.values.letsencrypt.include and data.values.letsencrypt.production:
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-prod-http01-issuer
+  name: letsencrypt-prod-issuer
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
     email: #@ data.values.letsencrypt.email
     privateKeySecretRef:
       name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          ingressClassName: contour
+    solvers: #@ get_solvers()

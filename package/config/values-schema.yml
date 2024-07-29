@@ -70,3 +70,21 @@ letsencrypt:
   #@schema/desc "The email address that Let's Encrypt will use to send info on expiring certificates or other issues."
   #@schema/validation min_len=5, when=lambda _, ctx: ctx.parent["include"]
   email: ""
+  challenge:
+    #@schema/desc "The type of challenge used by the ACME CA Server. Valid options: `http01`, `dns01`."
+    #@schema/validation one_of=["http01", "dns01"]
+    type: http01
+    secret:
+      #@schema/desc "Name of the Secret containing the credentials needed for the dns01 challenge."
+      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
+      name: ""
+      #@schema/desc "The key within the Secret that contains the credentials needed for the dns01 challenge."
+      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
+      key: ""
+      #@schema/desc "Namespace containing the Secret with the credentials needed for the dns01 challenge."
+      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
+      namespace: kadras-system
+    #@schema/desc "The DNS provider to use for the ACME dns01 challenge. Valid options: `digital_ocean`."
+    #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
+    #@schema/validation one_of=["digital_ocean"]
+    dns_provider: digital_ocean

@@ -146,6 +146,11 @@ Issues configuration.
 | `letsencrypt.include` | `false` | Whether to include a ClusterIssuer for Let's Encrypt. |
 | `letsencrypt.production` | `false` | Whether to use Let's Encrypt staging (recommended for non-production environments) or production. |
 | `letsencrypt.email` | `""` | The email address that Let's Encrypt will use to send info on expiring certificates or other issues. |
+| `letsencrypt.challenge.type` | `http01` | The type of challenge used by the ACME CA Server. Valid options: `http01`, `dns01`. |
+| `letsencrypt.challenge.secret.name` | `""` | Name of the Secret containing the credentials needed for the dns01 challenge. |
+| `letsencrypt.challenge.secret.key` | `""` | The key within the Secret that contains the credentials needed for the dns01 challenge. |
+| `letsencrypt.challenge.secret.namespace` | `""` | Namespace containing the Secret with the credentials needed for the dns01 challenge. |
+| `letsencrypt.challenge.dns_provider` | `http01` | The DNS provider to use for the ACME dns01 challenge. Valid options: `digital_ocean`. |
 
 </details>
 
