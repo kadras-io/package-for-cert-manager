@@ -19,7 +19,7 @@ logging:
   format: text
 
 acmeHTTP01Config:
-  solverImage: quay.io/jetstack/cert-manager-acmesolver:v1.16.1
+  solverImage: quay.io/jetstack/cert-manager-acmesolver:v1.17.1
 #@ end
 
 ---
