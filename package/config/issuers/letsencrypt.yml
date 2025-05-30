@@ -12,6 +12,11 @@
       tokenSecretRef:
         name: #@ data.values.letsencrypt.challenge.secret.name
         key: #@ data.values.letsencrypt.challenge.secret.key
+    #@ if/end data.values.letsencrypt.challenge.dns_provider == "cloudflare":
+    cloudflare:
+      apiTokenSecretRef:
+        name: #@ data.values.letsencrypt.challenge.secret.name
+        key: #@ data.values.letsencrypt.challenge.secret.key
 #@ end
 
 #@ if/end data.values.letsencrypt.include and not data.values.letsencrypt.production:

@@ -150,7 +150,7 @@ Issues configuration.
 | `letsencrypt.challenge.secret.name` | `""` | Name of the Secret containing the credentials needed for the dns01 challenge. |
 | `letsencrypt.challenge.secret.key` | `""` | The key within the Secret that contains the credentials needed for the dns01 challenge. |
 | `letsencrypt.challenge.secret.namespace` | `""` | Namespace containing the Secret with the credentials needed for the dns01 challenge. |
-| `letsencrypt.challenge.dns_provider` | `http01` | The DNS provider to use for the ACME dns01 challenge. Valid options: `digital_ocean`. |
+| `letsencrypt.challenge.dns_provider` | `http01` | The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`. |
 
 </details>
 
