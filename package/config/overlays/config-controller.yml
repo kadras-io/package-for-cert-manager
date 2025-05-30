@@ -20,6 +20,10 @@ logging:
 
 acmeHTTP01Config:
   solverImage: quay.io/jetstack/cert-manager-acmesolver:v1.17.2
+
+acmeDNS01Config:
+  recursiveNameservers: #@ data.values.controller.dns01.recursive_nameservers
+  recursiveNameserversOnly: #@ data.values.controller.dns01.recursive_nameservers_only
 #@ end
 
 ---

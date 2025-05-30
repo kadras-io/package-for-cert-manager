@@ -115,6 +115,8 @@ Settings for the cert-manager controller.
 |--------|---------|-------------|
 | `controller.loglevel` | `2` | Number of the log level verbosity. |
 | `controller.replicas` | `1` | The number of replicas. In order to enable high availability, 2 replicas are recommended. |
+| `controller.dns01.recursive_nameservers` | `[]` | Each nameserver can be either the IP address and port of a standard recursive DNS server, or the endpoint to an RFC 8484 DNS over HTTPS endpoint. |
+| `controller.dns01.recursive_nameservers_only` | `false` | When true, cert-manager will only ever query the configured DNS resolvers to perform the ACME DNS01 self check. This is useful in DNS constrained environments, where access to authoritative nameservers is restricted. Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers. |
 
 Settings for the cert-manager cainjector.
 

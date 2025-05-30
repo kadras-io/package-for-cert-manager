@@ -27,6 +27,13 @@ controller:
   #@schema/desc "The number of replicas. In order to enable high availability, 2 replicas are recommended."
   #@schema/validation min=1
   replicas: 1
+  #@schema/desc "Configures the behaviour of the ACME DNS01 challenge solver."
+  dns01:
+    #@schema/desc "Each nameserver can be either the IP address and port of a standard recursive DNS server, or the endpoint to an RFC 8484 DNS over HTTPS endpoint."
+    recursive_nameservers:
+      - ""
+    #@schema/desc "When true, cert-manager will only ever query the configured DNS resolvers to perform the ACME DNS01 self check. This is useful in DNS constrained environments, where access to authoritative nameservers is restricted. Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers."
+    recursive_nameservers_only: false
 
 #@schema/desc "Settings for the cainjector controller."
 cainjector:
