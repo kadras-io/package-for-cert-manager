@@ -12,7 +12,7 @@ spec:
   packageRef:
     refName: kyverno.packages.kadras.io
     versionSelection:
-      constraints: 1.15.0
+      constraints: 1.15.1
   values:
     - secretRef:
         name: kyverno-values
