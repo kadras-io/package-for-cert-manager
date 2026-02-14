@@ -18,6 +18,8 @@ k3d.pkg-path = "k3d"
 go.pkg-path = "go"
 kind.pkg-path = "kind"
 kuttl.pkg-path = "kuttl"
+cosign.pkg-path = "cosign"
+podman.pkg-path = "podman"
 
 [vars]
 

@@ -3,9 +3,6 @@ name: Test
 on:
   - push
 
-env:
-  FLOX_DISABLE_METRICS: true
-
 jobs:
   test-config:
     name: Configuration Tests

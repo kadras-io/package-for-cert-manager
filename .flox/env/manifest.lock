@@ -3,6 +3,9 @@
   "manifest": {
     "version": 1,
     "install": {
+      "cosign": {
+        "pkg-path": "cosign"
+      },
       "go": {
         "pkg-path": "go"
       },
@@ -42,6 +45,9 @@
       "kyverno-chainsaw": {
         "pkg-path": "kyverno-chainsaw"
       },
+      "podman": {
+        "pkg-path": "podman"
+      },
       "vendir": {
         "pkg-path": "vendir"
       },
@@ -67,6 +73,122 @@
     }
   },
   "packages": [
+    {
+      "attr_path": "cosign",
+      "broken": false,
+      "derivation": "/nix/store/nfall6p62x4mxcyfv8q6qg829q11bi7k-cosign-3.0.4.drv",
+      "description": "Container Signing CLI with support for ephemeral keys and Sigstore signing",
+      "install_id": "cosign",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "cosign-3.0.4",
+      "pname": "cosign",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T04:39:03.253210Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/jrkjj987x05rwn45rjjb0440nqcnfz4v-cosign-3.0.4"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cosign",
+      "broken": false,
+      "derivation": "/nix/store/vpf1y05v5xplfxffq6r78wl2wx2ljahg-cosign-3.0.4.drv",
+      "description": "Container Signing CLI with support for ephemeral keys and Sigstore signing",
+      "install_id": "cosign",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "cosign-3.0.4",
+      "pname": "cosign",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T05:11:38.063816Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/b1phjsqpw335rg8pisjwbhhimwizmwby-cosign-3.0.4"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cosign",
+      "broken": false,
+      "derivation": "/nix/store/qfhvsnmi9q8ird78q562qlrm4zqvk67d-cosign-3.0.4.drv",
+      "description": "Container Signing CLI with support for ephemeral keys and Sigstore signing",
+      "install_id": "cosign",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "cosign-3.0.4",
+      "pname": "cosign",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T05:43:37.845436Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/sjs6q9pv4kxp3iid24j9x2vggp439a00-cosign-3.0.4"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cosign",
+      "broken": false,
+      "derivation": "/nix/store/y496c2pzylbxv5nn8vgjpd5rsdklwaky-cosign-3.0.4.drv",
+      "description": "Container Signing CLI with support for ephemeral keys and Sigstore signing",
+      "install_id": "cosign",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "cosign-3.0.4",
+      "pname": "cosign",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T06:20:09.961729Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5qzgr5nhplwjgzd8lqlp3kbzg89w5ikn-cosign-3.0.4"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
     {
       "attr_path": "go",
       "broken": false,
@@ -1607,6 +1729,130 @@
       ],
       "outputs": {
         "out": "/nix/store/mf7gpbgdfxnvdc4x670901fyakpk64vx-kyverno-chainsaw-0.2.14"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "podman",
+      "broken": false,
+      "derivation": "/nix/store/n7g4raswm4z7v7cl5zsvwsfv1l02k9v1-podman-5.7.1.drv",
+      "description": "Program for managing pods, containers and container images",
+      "install_id": "podman",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "podman-5.7.1",
+      "pname": "podman",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T04:39:40.864382Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.1",
+      "outputs_to_install": [
+        "man",
+        "out"
+      ],
+      "outputs": {
+        "man": "/nix/store/r4ljm7zbdgg8qknmd5fr1v6dqp77hwbr-podman-5.7.1-man",
+        "out": "/nix/store/317vxx3m53rf33cp9x8lbaidv23gx2mg-podman-5.7.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "podman",
+      "broken": false,
+      "derivation": "/nix/store/iv74ag4mqkqz6n9xndxx3k3gjgz8i9da-podman-5.7.1.drv",
+      "description": "Program for managing pods, containers and container images",
+      "install_id": "podman",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "podman-5.7.1",
+      "pname": "podman",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T05:12:34.066227Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.1",
+      "outputs_to_install": [
+        "man",
+        "out"
+      ],
+      "outputs": {
+        "man": "/nix/store/s6gysjv390kgl5s3rpkj6dgpa86sq6vi-podman-5.7.1-man",
+        "out": "/nix/store/i2nvs53n4kfln6ysp17g89y031mghp81-podman-5.7.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "podman",
+      "broken": false,
+      "derivation": "/nix/store/y3g7a7pa5a0m7b19nmfsnz5kjhh2xkwn-podman-5.7.1.drv",
+      "description": "Program for managing pods, containers and container images",
+      "install_id": "podman",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "podman-5.7.1",
+      "pname": "podman",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T05:44:16.007148Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.1",
+      "outputs_to_install": [
+        "man",
+        "out"
+      ],
+      "outputs": {
+        "man": "/nix/store/5m698kx7wagmpw5gh9vsxvdd60vqkg6n-podman-5.7.1-man",
+        "out": "/nix/store/x540iibfr9sjlicv1hwvwwacwip3v83k-podman-5.7.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "podman",
+      "broken": false,
+      "derivation": "/nix/store/3b93hv3d2gk9wlspa5s4m1fmgcg87dvv-podman-5.7.1.drv",
+      "description": "Program for managing pods, containers and container images",
+      "install_id": "podman",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "name": "podman-5.7.1",
+      "pname": "podman",
+      "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
+      "rev_count": 944744,
+      "rev_date": "2026-02-11T20:21:07Z",
+      "scrape_date": "2026-02-14T06:21:10.654218Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.7.1",
+      "outputs_to_install": [
+        "man",
+        "out"
+      ],
+      "outputs": {
+        "man": "/nix/store/hlqfr4vsw6w69375s6cp3pf26y79h98g-podman-5.7.1-man",
+        "out": "/nix/store/3wqgky80jvcnk4nv05l8jqh6vsrq0bik-podman-5.7.1"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
