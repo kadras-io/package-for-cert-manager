@@ -51,4 +51,4 @@ jobs:
       - name: Run integration tests
         uses: flox/activate-action@410568008895a0f2e09a34bbd9523f8ef1f2d292 # v1.1.0
         with:
-          command: K8S_VERSION=${{ matrix.k8s_version }} task test:integration
+          command: task test:integration -e K8S_VERSION=${{ matrix.k8s_version }}
