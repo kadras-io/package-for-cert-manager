@@ -56,7 +56,7 @@
       }
     },
     "vars": {
-      "FLOX_DISABLE_METRICS": "false"
+      "FLOX_DISABLE_METRICS": "true"
     },
     "hook": {},
     "profile": {},
