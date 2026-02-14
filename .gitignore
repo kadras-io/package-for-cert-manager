@@ -1,6 +1,7 @@
 ### Carvel ###
 carvel-artifacts/
 repo/
+package/.imgpkg
 schema-openapi.yml
 
 ### KUTTL ###

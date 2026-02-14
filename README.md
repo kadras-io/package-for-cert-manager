@@ -105,8 +105,8 @@ Settings for the corporate proxy.
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `proxy.http_proxy` | `""` | The HTTPS proxy to use for network traffic. |
-| `proxy.https_proxy` | `""` | The HTTP proxy to use for network traffic. |
+| `proxy.http_proxy` | `""` | The HTTP proxy to use for network traffic. |
+| `proxy.https_proxy` | `""` | The HTTPS proxy to use for network traffic. |
 | `proxy.no_proxy` | `""` | A comma-separated list of hostnames, IP addresses, or IP ranges in CIDR format that should not use the proxy. |
 
 Settings for the cert-manager controller.
@@ -151,8 +151,8 @@ Issues configuration.
 | `letsencrypt.challenge.type` | `http01` | The type of challenge used by the ACME CA Server. Valid options: `http01`, `dns01`. |
 | `letsencrypt.challenge.secret.name` | `""` | Name of the Secret containing the credentials needed for the dns01 challenge. |
 | `letsencrypt.challenge.secret.key` | `""` | The key within the Secret that contains the credentials needed for the dns01 challenge. |
-| `letsencrypt.challenge.secret.namespace` | `""` | Namespace containing the Secret with the credentials needed for the dns01 challenge. |
-| `letsencrypt.challenge.dns_provider` | `http01` | The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`. |
+| `letsencrypt.challenge.secret.namespace` | `kadras-system` | Namespace containing the Secret with the credentials needed for the dns01 challenge. Required when challenge type is dns01. |
+| `letsencrypt.challenge.dns_provider` | `digital_ocean` | The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`. Required when challenge type is dns01. |
 
 </details>
 
