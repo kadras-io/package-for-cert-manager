@@ -20,7 +20,7 @@ kind.pkg-path = "kind"
 kuttl.pkg-path = "kuttl"
 
 [vars]
-FLOX_DISABLE_METRICS=false
+FLOX_DISABLE_METRICS = "false"
 
 [hook]
 
