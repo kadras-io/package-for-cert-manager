@@ -3,57 +3,23 @@ name: Test
 on:
   - push
 
-permissions:
-  contents: read
-
 env:
   FLOX_DISABLE_METRICS: true
 
 jobs:
   test-config:
     name: Configuration Tests
-    runs-on: ubuntu-24.04
     permissions:
       contents: read
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-
-      - name: Install Flox
-        uses: flox/install-flox-action@9428713e8d3883274c334b4b95b8830beebd24d2 # v2.3.0
-      
-      - name: Run configuration tests
-        uses: flox/activate-action@410568008895a0f2e09a34bbd9523f8ef1f2d292 # v1.1.0
-        with:
-          command: task test:config
+    uses: kadras-io/github-reusable-workflows/.github/workflows/carvel-package-test-config.yml@main
 
   test-integration:
     name: Integration Tests
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     strategy:
       matrix:
         k8s_version: [v1.33, v1.34, v1.35]
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-      
-      - name: Install Flox
-        uses: flox/install-flox-action@9428713e8d3883274c334b4b95b8830beebd24d2 # v2.3.0
-      
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@00f483c95eacf401cf9f4aa3746964071a747334 # master
-      
-      - name: Install kctrl
-        run: |
-          brew tap carvel-dev/carvel
-          brew install kctrl
-      
-      - name: Run integration tests
-        uses: flox/activate-action@410568008895a0f2e09a34bbd9523f8ef1f2d292 # v1.1.0
-        env:
-          K8S_VERSION: ${{ matrix.k8s_version }}
-        with:
-          command: task test:integration
+    permissions:
+      contents: read
+    uses: kadras-io/github-reusable-workflows/.github/workflows/carvel-package-test-integration.yml@main
+    with:
+      k8s_version: ${{ matrix.k8s_version }}
