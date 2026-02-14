@@ -55,9 +55,6 @@
         "pkg-path": "ytt"
       }
     },
-    "vars": {
-      "FLOX_DISABLE_METRICS": "true"
-    },
     "hook": {},
     "profile": {},
     "options": {
