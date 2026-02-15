@@ -151,8 +151,8 @@ Issues configuration.
 | `letsencrypt.challenge.type` | `http01` | The type of challenge used by the ACME CA Server. Valid options: `http01`, `dns01`. |
 | `letsencrypt.challenge.secret.name` | `""` | Name of the Secret containing the credentials needed for the dns01 challenge. |
 | `letsencrypt.challenge.secret.key` | `""` | The key within the Secret that contains the credentials needed for the dns01 challenge. |
-| `letsencrypt.challenge.secret.namespace` | `kadras-system` | Namespace containing the Secret with the credentials needed for the dns01 challenge. Required when challenge type is dns01. |
-| `letsencrypt.challenge.dns_provider` | `digital_ocean` | The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`. Required when challenge type is dns01. |
+| `letsencrypt.challenge.secret.namespace` | `kadras-system` | Namespace containing the Secret with the credentials needed for the dns01 challenge. |
+| `letsencrypt.challenge.dns_provider` | `hetzner` | The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`, `hetzner`. |
 
 </details>
 

@@ -1,16 +1,50 @@
 # Configuring DNS01 Challenge
 
-The DNS01 challenge is used by cert-manager to prove domain ownership by creating specific DNS records. This guide explains how to configure DNS01 challenges for DigitalOcean and Cloudflare DNS providers.
+The DNS01 challenge is used by cert-manager to prove domain ownership by creating specific DNS records. This guide explains how to configure DNS01 challenges for Hetzner, DigitalOcean, or Cloudflare DNS providers.
 
-## Enabling DNS01 Challenge
+## Configuring DNS01 Challenge for Hetzner
 
-To use DNS01 challenges, you need to configure the challenge type (by default it is set to `http01`) in the cert-manager package configuration:
+To use Hetzner as your DNS provider for DNS01 challenges, you need to create a Kubernetes Secret containing your Hetzner API Token and then configure the cert-manager package to use that secret.
+
+### Pre-requisites
+
+In order to use the Hetzner DNS01 solver, you need to have the [cert-manager-webhook-hetzner](https://github.com/kadras-io/package-for-cert-manager-webhook-hetzner) package installed in your cluster. This package provides the necessary webhook for cert-manager to interact with Hetzner's DNS API.
+
+### Step 1: Create a Hetzner API Token
+
+Generate a new [Hetzner API Token](https://cloud.digitalocean.com/account/api/tokens/new) and copy the token for later use. Make sure to grant the token the necessary permissions to manage DNS records for your domains (read & write). For more details, check out the [Hetzner documentatio on generating an API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
+
+### Step 2: Create Kubernetes Secret
+
+Create a Kubernetes Secret in the specified namespace (default: `kadras-system`) containing your Hetzner API Token:
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hetzner-dns
+  namespace: kadras-system
+stringData:
+  api-token: "<your-hetzner-api-token>"
+```
+
+### Step 3: Configure cert-manager package
+
+To use DNS01 challenges, you need to configure the challenge type (by default it is set to `http01`) in the cert-manager package configuration and specify the secret containing your Hetzner API Token:
 
 ```yaml
 letsencrypt:
   include: true
+  production: false # Set to true for production environment
+  email: your-email@example.com # Email address for ACME registration and recovery contact
   challenge:
     type: dns01
+    secret:
+      name: hetzner-dns
+      key: api-token
+      namespace: kadras-system
+    dns_provider: hetzner
 ```
 
 ## Configuring DNS01 Challenge for DigitalOcean

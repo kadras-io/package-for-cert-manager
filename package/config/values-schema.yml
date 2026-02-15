@@ -91,7 +91,7 @@ letsencrypt:
       #@schema/desc "Namespace containing the Secret with the credentials needed for the dns01 challenge."
       #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
       namespace: kadras-system
-    #@schema/desc "The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`."
+    #@schema/desc "The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`, `hetzner`."
     #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
-    #@schema/validation one_of=["cloudflare", "digital_ocean"]
-    dns_provider: digital_ocean
+    #@schema/validation one_of=["cloudflare", "digital_ocean", "hetzner"]
+    dns_provider: hetzner
