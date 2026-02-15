@@ -12,7 +12,7 @@ In order to use the Hetzner DNS01 solver, you need to have the [cert-manager-web
 
 ### Step 1: Create a Hetzner API Token
 
-Generate a new [Hetzner API Token](https://cloud.digitalocean.com/account/api/tokens/new) and copy the token for later use. Make sure to grant the token the necessary permissions to manage DNS records for your domains (read & write). For more details, check out the [Hetzner documentatio on generating an API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
+Generate a new [Hetzner API Token](https://cloud.digitalocean.com/account/api/tokens/new) and copy the token for later use. Make sure to grant the token the necessary permissions to manage DNS records for your domains (read & write). For more details, check out the [Hetzner documentation on generating an API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
 
 ### Step 2: Create Kubernetes Secret
 
