@@ -98,7 +98,6 @@ The cert-manager package has the following configurable properties.
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `namespace` | `cert-manager` | The namespace in which to deploy cert-manager. |
 | `policies.include` | `false` | Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation. |
 
 Settings for the corporate proxy.
