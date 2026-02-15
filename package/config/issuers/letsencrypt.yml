@@ -20,7 +20,7 @@
     #@ if/end data.values.letsencrypt.challenge.dns_provider == "hetzner":
     webhook:
       solverName: hetzner
-      groupName: acme.hetzner.com
+      groupName: acme.hetzner.kadras.io
       config:
         tokenSecretKeyRef:
           name: #@ data.values.letsencrypt.challenge.secret.name
