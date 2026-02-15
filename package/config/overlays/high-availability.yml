@@ -15,7 +15,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager
-  namespace: #@ data.values.namespace
+  namespace: cert-manager
   labels:
     app: cert-manager
     app.kubernetes.io/name: cert-manager
@@ -44,7 +44,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager-cainjector
-  namespace: #@ data.values.namespace
+  namespace: cert-manager
   labels:
     app: cainjector
     app.kubernetes.io/name: cainjector
@@ -73,7 +73,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: cert-manager-webhook
-  namespace: #@ data.values.namespace
+  namespace: cert-manager
   labels:
     app: webhook
     app.kubernetes.io/name: webhook

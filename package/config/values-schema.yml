@@ -57,6 +57,11 @@ webhook:
   #@schema/desc "The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility."
   secure_port: 6443
 
+#@schema/desc "Settings for Gateway API support."
+gateway_api:
+  #@schema/desc "Whether gateway API integration is enabled within cert-manager."
+  enable: false
+
 #@schema/desc "Leader election configuration for the cert-manager and cert-manager-cainjector Deployments."
 leader_election:
   #@schema/desc "Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility."

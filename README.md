@@ -134,6 +134,12 @@ Settings for the cert-manager webhook.
 | `webhook.host_network` | `false` | Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility. |
 | `webhook.secure_port` | `6443` | The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility. |
 
+Settings for Gateway API support.
+
+| Config | Default | Description |
+|--------|---------|-------------|
+| `gateway_api.enable` | `false` | Whether gateway API integration is enabled within cert-manager. |
+
 Leader election configuration for the cert-manager controller and cainjector Deployments.
 
 | Config | Default | Description |
