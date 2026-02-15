@@ -15,6 +15,7 @@ tasks:
   cluster:setup:
     desc: Create kind cluster
     cmds:
+      - kind delete cluster --name {{.CLUSTER_NAME}}
       - ytt -f test/setup/clusters/kind-template.yml --data-value k8s_version="{{.K8S_VERSION | replace "v" ""}}" | kind create cluster --name {{.CLUSTER_NAME}} --config -
       - kubectl wait --for=condition=Ready nodes --all --timeout=5m
       - kapp deploy -a setup -f test/setup/assets -y
