@@ -145,6 +145,12 @@ Leader election configuration for the cert-manager controller and cainjector Dep
 |--------|---------|-------------|
 | `leader_election.namespace` | `kube-system` | Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility. |
 
+Settings for Prometheus metrics.
+
+| Config | Default | Description |
+|--------|---------|-------------|
+| `prometheus.enabled` | `true` | Whether to enable the Prometheus annotations for automatic scraping of cert-manager metrics. |
+
 Issues configuration.
 
 | Config | Default | Description |

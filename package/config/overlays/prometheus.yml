@@ -1,0 +1,20 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ if not data.values.prometheus.enabled:
+#@overlay/match by=overlay.subset({"kind":"Deployment","metadata":{"namespace":"cert-manager"}}), expects="3+"
+---
+spec:
+  template:
+    metadata:
+      annotations:
+        #@overlay/remove
+        prometheus.io/scrape:
+        #@overlay/match missing_ok=True
+        #@overlay/remove missing_ok=True
+        prometheus.io/scheme:
+        #@overlay/remove
+        prometheus.io/port:
+        #@overlay/remove
+        prometheus.io/path:
+#@ end

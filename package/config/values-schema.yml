@@ -65,6 +65,11 @@ leader_election:
   #@schema/validation min_len=1
   namespace: kube-system
 
+#@schema/desc "Settings for Prometheus metrics."
+prometheus:
+  #@schema/desc "Whether to enable the Prometheus annotations for automatic scraping of cert-manager metrics."
+  enabled: true
+
 #@schema/desc "Settings for the built-in, private PKI"
 private_pki:
   #@schema/desc "Whether to include a ClusterIssuer for a private PKI."
