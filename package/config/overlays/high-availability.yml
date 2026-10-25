@@ -13,9 +13,7 @@
 #! the memory of the controller grows with the number of certificates. Tune them with a ytt overlay.
 #! See: https://cert-manager.io/docs/installation/best-practice/
 
-#@ memory_requests = {"controller": "64Mi", "cainjector": "64Mi", "webhook": "32Mi"}
-
-#@ for component in components():
+#@ for component in components:
 #@ replicas = component_values(component).replicas
 
 #@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":component.deployment}})
@@ -41,7 +39,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-              memory: #@ memory_requests[component.key]
+              memory: #@ component.memory
 
 #@ if replicas > 1:
 ---

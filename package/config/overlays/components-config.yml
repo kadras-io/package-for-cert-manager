@@ -28,7 +28,7 @@
 #@   ],
 #@ }
 
-#@ for component in components():
+#@ for component in components:
 
 ---
 apiVersion: v1

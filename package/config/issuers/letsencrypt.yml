@@ -1,24 +1,25 @@
 #@ load("@ytt:data", "data")
-#@ load("/lib/cert_manager.star", "letsencrypt_account_secret_name", "letsencrypt_issuer_name", "letsencrypt_server", "letsencrypt_solver")
+#@ load("/lib/cert_manager.star", "letsencrypt_environment", "letsencrypt_solver")
 
 #! A ClusterIssuer for Let's Encrypt, solving either HTTP-01 or DNS-01 challenges.
 #! See: https://cert-manager.io/docs/configuration/acme/
 
 #@ letsencrypt = data.values.issuers.letsencrypt
+#@ environment = letsencrypt_environment()
 
 #@ if letsencrypt.enabled:
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: #@ letsencrypt_issuer_name()
+  name: #@ environment.issuer
 spec:
   acme:
-    server: #@ letsencrypt_server()
+    server: #@ environment.server
     #@ if/end letsencrypt.email:
     email: #@ letsencrypt.email
     privateKeySecretRef:
-      name: #@ letsencrypt_account_secret_name()
+      name: #@ environment.account_secret
     solvers:
     - #@ letsencrypt_solver()
 #@ end

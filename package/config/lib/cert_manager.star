@@ -5,30 +5,26 @@ load("@ytt:struct", "struct")
 # COMPONENTS
 # ###########
 
-# The Deployment, container, and labels of each component, as defined in the upstream manifest.
-def components():
-  return [
-    struct.encode({"key": "controller", "deployment": "cert-manager", "container": "cert-manager-controller", "app": "cert-manager", "name": "cert-manager", "component": "controller"}),
-    struct.encode({"key": "cainjector", "deployment": "cert-manager-cainjector", "container": "cert-manager-cainjector", "app": "cainjector", "name": "cainjector", "component": "cainjector"}),
-    struct.encode({"key": "webhook", "deployment": "cert-manager-webhook", "container": "cert-manager-webhook", "app": "webhook", "name": "webhook", "component": "webhook"}),
-  ]
-end
-
-def component_labels(component):
-  return {
-    "app": component.app,
-    "app.kubernetes.io/name": component.name,
-    "app.kubernetes.io/instance": "cert-manager",
-    "app.kubernetes.io/component": component.component,
-  }
-end
+# The Deployment, container, and `app.kubernetes.io/name` label of each component, as defined in the upstream manifest,
+# and the memory it requests. `key` is the name of its section in the values and its `app.kubernetes.io/component` label.
+components = [
+  struct.encode({"key": "controller", "deployment": "cert-manager", "container": "cert-manager-controller", "name": "cert-manager", "memory": "64Mi"}),
+  struct.encode({"key": "cainjector", "deployment": "cert-manager-cainjector", "container": "cert-manager-cainjector", "name": "cainjector", "memory": "64Mi"}),
+  struct.encode({"key": "webhook", "deployment": "cert-manager-webhook", "container": "cert-manager-webhook", "name": "webhook", "memory": "32Mi"}),
+]
 
 def component_selector(component):
   return {
     "app.kubernetes.io/name": component.name,
     "app.kubernetes.io/instance": "cert-manager",
-    "app.kubernetes.io/component": component.component,
+    "app.kubernetes.io/component": component.key,
   }
+end
+
+def component_labels(component):
+  labels = {"app": component.name}
+  labels.update(component_selector(component))
+  return labels
 end
 
 def component_values(component):
@@ -81,7 +77,7 @@ def controller_config():
       },
     },
     "acmeDNS01Config": {
-      "recursiveNameservers": [ns for ns in dns01.recursive_nameservers if ns],
+      "recursiveNameservers": dns01.recursive_nameservers,
       "recursiveNameserversOnly": dns01.recursive_nameservers_only,
     },
   }
@@ -127,25 +123,14 @@ end
 # ISSUERS
 # ########
 
-def letsencrypt_issuer_name():
-  if data.values.issuers.letsencrypt.environment == "production":
-    return "letsencrypt-prod-issuer"
-  end
-  return "letsencrypt-staging-issuer"
-end
+# The ClusterIssuer, the Secret with the ACME account key, and the ACME server of each Let's Encrypt environment.
+_letsencrypt_environments = {
+  "staging": struct.encode({"issuer": "letsencrypt-staging-issuer", "account_secret": "letsencrypt-staging", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}),
+  "production": struct.encode({"issuer": "letsencrypt-prod-issuer", "account_secret": "letsencrypt-prod", "server": "https://acme-v02.api.letsencrypt.org/directory"}),
+}
 
-def letsencrypt_account_secret_name():
-  if data.values.issuers.letsencrypt.environment == "production":
-    return "letsencrypt-prod"
-  end
-  return "letsencrypt-staging"
-end
-
-def letsencrypt_server():
-  if data.values.issuers.letsencrypt.environment == "production":
-    return "https://acme-v02.api.letsencrypt.org/directory"
-  end
-  return "https://acme-staging-v02.api.letsencrypt.org/directory"
+def letsencrypt_environment():
+  return _letsencrypt_environments[data.values.issuers.letsencrypt.environment]
 end
 
 def http01_solver():
