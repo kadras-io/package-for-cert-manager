@@ -2,8 +2,8 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      tag: v1.21.1
-      url: https://api.github.com/repos/cert-manager/cert-manager/releases/361831037
+      tag: v1.21.3
+      url: https://api.github.com/repos/cert-manager/cert-manager/releases/422266966
     path: .
   path: config/upstream
 kind: LockConfig
