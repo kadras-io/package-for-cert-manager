@@ -1,8 +1,7 @@
 ---
+# The package is deleted with kapp, as kapp-controller does when deleting the PackageInstall:
+# `kctrl dev --delete` doesn't delete the resources of a local installation.
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:
-  - script: |
-      cd ../../../package && \
-      kubectl config set-context --current --namespace=tests && \
-      ytt -f ../test/integration/policies/config -f package-resources.yml | kctrl dev -f- --local --delete -y
+  - script: kapp delete -a cert-manager.app -n tests -y
