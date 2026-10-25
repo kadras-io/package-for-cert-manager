@@ -1,0 +1,6 @@
+#! Without the private CA, and without a default issuer.
+---
+issuers:
+  private_ca:
+    enabled: false
+  default_issuer: ""

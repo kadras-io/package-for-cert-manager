@@ -1,0 +1,13 @@
+# expected: an address like `ns1.example.com:53`
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: dns01
+    dns01:
+      provider: rfc2136
+      credentials:
+        secret: tsig-secret
+        key: tsig-secret-key
+      rfc2136:
+        tsig_key_name: cert-manager

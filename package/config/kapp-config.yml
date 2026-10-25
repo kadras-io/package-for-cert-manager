@@ -4,8 +4,8 @@ kind: Config
 
 minimumRequiredVersion: 0.50.0
 
-# Wait rules specify how to wait for resources that kapp does not wait for by default.
-# See more about the wait rules: https://carvel.dev/kapp/docs/latest/config/#waitrules.
+#! Wait rules specify how to wait for resources that kapp does not wait for by default.
+#! See more about the wait rules: https://carvel.dev/kapp/docs/latest/config/#waitrules.
 waitRules:
 
 - supportsObservedGeneration: false

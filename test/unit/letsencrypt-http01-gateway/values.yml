@@ -1,0 +1,7 @@
+#! The HTTP-01 challenges are solved via the Gateway of the Kadras Contour package.
+---
+gateway_api:
+  enabled: true
+issuers:
+  letsencrypt:
+    enabled: true

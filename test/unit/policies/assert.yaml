@@ -1,0 +1,13 @@
+apiVersion: kyverno.io/v1
+kind: Policy
+metadata:
+  name: cert-manager-verify-image
+  namespace: cert-manager
+spec:
+  (validationFailureAction == null): true
+  rules:
+  - name: verify-signature
+    verifyImages:
+    - failureAction: Enforce
+      imageReferences:
+      - quay.io/jetstack/cert-manager*

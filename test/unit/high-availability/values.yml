@@ -1,0 +1,7 @@
+---
+controller:
+  replicas: 2
+cainjector:
+  replicas: 2
+webhook:
+  replicas: 3

@@ -1,0 +1,13 @@
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: dns01
+    dns01:
+      provider: rfc2136
+      credentials:
+        secret: tsig-secret
+        key: tsig-secret-key
+      rfc2136:
+        nameserver: ns1.kadras.io:53
+        tsig_key_name: cert-manager

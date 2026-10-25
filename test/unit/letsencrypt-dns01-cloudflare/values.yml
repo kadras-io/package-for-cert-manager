@@ -1,0 +1,13 @@
+#! The credentials are already in the package namespace, so they're not synced.
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    environment: production
+    solver: dns01
+    dns01:
+      provider: cloudflare
+      credentials:
+        secret: cloudflare-dns
+        key: api-token
+        namespace: cert-manager

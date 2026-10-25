@@ -1,0 +1,16 @@
+#! A webhook solver that reads its credentials from its own configuration, so no Secret is synced.
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: dns01
+    dns01:
+      provider: webhook
+      webhook:
+        group_name: acme.mycompany.com
+        solver_name: ovh
+        config:
+          endpoint: ovh-eu
+          applicationKeyRef:
+            name: ovh-credentials
+            key: applicationKey

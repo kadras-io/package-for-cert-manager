@@ -1,0 +1,22 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! All the components expose metrics in the Prometheus format on port 9402 (`/metrics`),
+#! and their Pods are annotated for Prometheus scraping in the upstream manifest.
+#! The log level and format are set in the configuration file of each component (see components-config.yml).
+#! See: https://cert-manager.io/docs/devops-tips/prometheus-metrics/
+
+#@ if not data.values.observability.metrics.enabled:
+#@overlay/match by=overlay.subset({"kind":"Deployment"}), expects=3
+---
+spec:
+  template:
+    metadata:
+      annotations:
+        #@overlay/remove
+        prometheus.io/scrape:
+        #@overlay/remove
+        prometheus.io/port:
+        #@overlay/remove
+        prometheus.io/path:
+#@ end

@@ -1,0 +1,29 @@
+# Leader election doesn't happen in kube-system.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kube-system
+---
+# No PodDisruptionBudgets with a single replica.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+---
+# No Let's Encrypt issuer.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod-issuer
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+---
+apiVersion: kyverno.io/v1
+kind: Policy
+---
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretImport

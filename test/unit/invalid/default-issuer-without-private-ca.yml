@@ -1,0 +1,5 @@
+# expected: `issuers.default_issuer` to be changed when `issuers.private_ca.enabled` is false
+---
+issuers:
+  private_ca:
+    enabled: false

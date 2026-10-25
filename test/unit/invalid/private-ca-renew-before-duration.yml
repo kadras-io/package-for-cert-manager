@@ -1,0 +1,6 @@
+# expected: `issuers.private_ca.renew_before` to be shorter than `issuers.private_ca.duration`
+---
+issuers:
+  private_ca:
+    duration: 720h
+    renew_before: 720h

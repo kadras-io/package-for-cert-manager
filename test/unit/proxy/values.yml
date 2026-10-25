@@ -1,0 +1,4 @@
+---
+proxy:
+  https_proxy: http://proxy.kadras.io:3128
+  no_proxy: .svc,.cluster.local

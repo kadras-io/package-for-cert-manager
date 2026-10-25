@@ -1,0 +1,46 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-issuer
+spec:
+  acme:
+    solvers:
+    - dns01:
+        webhook:
+          groupName: acme.hetzner.kadras.io
+          solverName: hetzner
+          config:
+            tokenSecretKeyRef:
+              name: hetzner-dns
+              key: api-token
+---
+# The credentials are synced from kadras-system into the package namespace.
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretExport
+metadata:
+  name: hetzner-dns
+  namespace: kadras-system
+spec:
+  toNamespaces:
+  - cert-manager
+---
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretImport
+metadata:
+  name: hetzner-dns
+  namespace: cert-manager
+spec:
+  fromNamespace: kadras-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    acmeDNS01Config:
+      recursiveNameservers:
+      - 1.1.1.1:53
+      - 9.9.9.9:53
+      recursiveNameserversOnly: true

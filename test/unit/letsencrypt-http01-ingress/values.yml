@@ -1,0 +1,7 @@
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    environment: production
+    email: security@kadras.io
+  default_issuer: letsencrypt-prod-issuer

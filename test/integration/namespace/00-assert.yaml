@@ -1,0 +1,40 @@
+# Custom namespace, with leader election and the webhook wired to it.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: certificates
+status:
+  readyReplicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: certificates
+status:
+  readyReplicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: certificates
+status:
+  readyReplicas: 1
+---
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: cert-manager-controller
+  namespace: certificates
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kadras-ca-issuer
+status:
+  conditions:
+  - status: "True"
+    type: Ready

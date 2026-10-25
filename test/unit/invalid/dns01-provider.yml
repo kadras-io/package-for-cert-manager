@@ -1,0 +1,6 @@
+# expected: one of ["hetzner", "cloudflare", "rfc2136", "webhook"]
+---
+issuers:
+  letsencrypt:
+    dns01:
+      provider: digitalocean
