@@ -1,0 +1,45 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! cert-manager runs in the package namespace, which is also used for leader election
+#! (upstream uses `kube-system`, which some managed clusters don't allow writing to)
+#! and as the cluster resource namespace, where ClusterIssuers look for their Secrets.
+
+#@ namespace = data.values.namespace
+
+#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name":"cert-manager"}})
+---
+metadata:
+  name: #@ namespace
+
+#! The leader election Roles and RoleBindings are the only resources in `kube-system`.
+#@ cert_manager_namespace = overlay.subset({"metadata":{"namespace":"cert-manager"}})
+#@ kube_system_namespace = overlay.subset({"metadata":{"namespace":"kube-system"}})
+
+#@overlay/match by=overlay.or_op(cert_manager_namespace, kube_system_namespace), expects="15+"
+---
+metadata:
+  namespace: #@ namespace
+
+#@ cluster_role_binding = overlay.subset({"kind":"ClusterRoleBinding"})
+#@ role_binding = overlay.subset({"kind":"RoleBinding"})
+
+#@overlay/match by=overlay.or_op(cluster_role_binding, role_binding), expects="10+"
+---
+subjects:
+#@overlay/match by=overlay.subset({"kind":"ServiceAccount"})
+- namespace: #@ namespace
+
+#@ mutating_webhook = overlay.subset({"kind":"MutatingWebhookConfiguration", "metadata":{"name":"cert-manager-webhook"}})
+#@ validating_webhook = overlay.subset({"kind":"ValidatingWebhookConfiguration", "metadata":{"name":"cert-manager-webhook"}})
+
+#@overlay/match by=overlay.or_op(mutating_webhook, validating_webhook), expects=2
+---
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from-secret: #@ namespace + "/cert-manager-webhook-ca"
+webhooks:
+#@overlay/match by=overlay.all, expects="1+"
+- clientConfig:
+    service:
+      namespace: #@ namespace

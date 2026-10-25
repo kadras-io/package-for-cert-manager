@@ -1,89 +1,60 @@
 #@ load("@ytt:data", "data")
 #@ load("@ytt:overlay", "overlay")
+#@ load("/lib/cert_manager.star", "component_labels", "component_selector", "component_values", "components")
 
-#! CONTROLLER
+#! The controller and the cainjector are active/passive: one replica is elected leader, the others are hot standby.
+#! The webhook is active/active: all replicas serve the admission requests from the Kubernetes API server.
+#!
+#! With more than one replica, a PodDisruptionBudget keeps at least one available during voluntary disruptions,
+#! and the replicas are spread across nodes on a best-effort basis, so that single-node clusters keep working.
+#!
+#! All the components run with the `system-cluster-critical` priority, since the webhook is on the path
+#! of every request for cert-manager resources. They set small resource requests and no limits:
+#! the memory of the controller grows with the number of certificates. Tune them with a ytt overlay.
+#! See: https://cert-manager.io/docs/installation/best-practice/
 
-#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
+#@ memory_requests = {"controller": "64Mi", "cainjector": "64Mi", "webhook": "32Mi"}
+
+#@ for component in components():
+#@ replicas = component_values(component).replicas
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":component.deployment}})
 ---
 spec:
-  #@overlay/match missing_ok=True
-  replicas: #@ data.values.controller.replicas
+  replicas: #@ replicas
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      priorityClassName: system-cluster-critical
+      #@ if/end replicas > 1:
+      #@overlay/match missing_ok=True
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels: #@ component_selector(component)
+      containers:
+        #@overlay/match by="name"
+        - name: #@ component.container
+          #@overlay/match missing_ok=True
+          resources:
+            requests:
+              cpu: 10m
+              memory: #@ memory_requests[component.key]
 
-#@ if data.values.controller.replicas > 1:
+#@ if replicas > 1:
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: cert-manager
-  namespace: cert-manager
-  labels:
-    app: cert-manager
-    app.kubernetes.io/name: cert-manager
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "controller"
+  name: #@ component.deployment
+  namespace: #@ data.values.namespace
+  labels: #@ component_labels(component)
 spec:
   minAvailable: 1
   selector:
-    matchLabels:
-      app.kubernetes.io/name: cert-manager
-      app.kubernetes.io/instance: cert-manager
-      app.kubernetes.io/component: "controller"
+    matchLabels: #@ component_selector(component)
 #@ end
 
-#! CAINJECTOR
-
-#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-cainjector"}})
----
-spec:
-  #@overlay/match missing_ok=True
-  replicas: #@ data.values.cainjector.replicas
-
-#@ if data.values.cainjector.replicas > 1:
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: cert-manager-cainjector
-  namespace: cert-manager
-  labels:
-    app: cainjector
-    app.kubernetes.io/name: cainjector
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "cainjector"
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: cainjector
-      app.kubernetes.io/instance: cert-manager
-      app.kubernetes.io/component: "cainjector"
-#@ end
-
-#! WEBHOOK
-
-#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-webhook"}})
----
-spec:
-  #@overlay/match missing_ok=True
-  replicas: #@ data.values.webhook.replicas
-
-#@ if data.values.webhook.replicas >= 2:
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: cert-manager-webhook
-  namespace: cert-manager
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: webhook
-      app.kubernetes.io/instance: cert-manager
-      app.kubernetes.io/component: "webhook"
 #@ end

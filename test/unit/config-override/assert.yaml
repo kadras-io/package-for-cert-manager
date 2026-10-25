@@ -1,0 +1,36 @@
+# `<component>.config` takes precedence over the computed configuration, and leaves the rest untouched.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    maxConcurrentChallenges: 120
+    featureGates:
+      ACMEUseARI: true
+    logging:
+      verbosity: 3
+      format: text
+    clusterResourceNamespace: cert-manager
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    securePort: 10260
+    healthzPort: 6080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      (containers[?name == 'cert-manager-webhook'] | [0]):
+        (ports[?name == 'https'] | [0].containerPort): 10260

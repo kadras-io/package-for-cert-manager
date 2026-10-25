@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-issuer
+spec:
+  acme:
+    solvers:
+    - dns01:
+        webhook:
+          groupName: acme.mycompany.com
+          solverName: ovh
+          config:
+            endpoint: ovh-eu
+            applicationKeyRef:
+              name: ovh-credentials
+              key: applicationKey

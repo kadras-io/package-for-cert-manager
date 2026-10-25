@@ -1,0 +1,5 @@
+# expected: a number of hours, like `8760h`
+---
+issuers:
+  private_ca:
+    duration: 365d

@@ -1,0 +1,6 @@
+# expected: one of ["staging", "production"]
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    environment: prod

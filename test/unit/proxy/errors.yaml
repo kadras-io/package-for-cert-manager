@@ -1,0 +1,10 @@
+# Only the controller uses the proxy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+spec:
+  template:
+    spec:
+      (containers[?name == 'cert-manager-webhook'] | [0]):
+        (env[?name == 'HTTPS_PROXY'] | length(@)): 1

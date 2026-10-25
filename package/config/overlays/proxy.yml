@@ -1,0 +1,22 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! Only the controller makes requests outside the cluster: to the ACME servers and the DNS providers.
+
+#@ proxy = data.values.proxy
+#@ env = [{"name": name, "value": value} for name, value in [("HTTP_PROXY", proxy.http_proxy), ("HTTPS_PROXY", proxy.https_proxy), ("NO_PROXY", proxy.no_proxy)] if value]
+
+#@ if env:
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-controller
+          env:
+          #@ for var in env:
+          - #@ var
+          #@ end
+#@ end

@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-issuer
+spec:
+  acme:
+    solvers:
+    - dns01:
+        rfc2136:
+          nameserver: ns1.kadras.io:53
+          tsigKeyName: cert-manager
+          tsigAlgorithm: HMACSHA512
+          tsigSecretSecretRef:
+            name: tsig-secret
+            key: tsig-secret-key

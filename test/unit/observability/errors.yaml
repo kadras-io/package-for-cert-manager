@@ -1,0 +1,7 @@
+# Metrics are disabled, so no Prometheus annotations.
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    metadata:
+      (annotations."prometheus.io/scrape"): "true"

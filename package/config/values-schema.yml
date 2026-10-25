@@ -1,104 +1,209 @@
-#@data/values-schema
+#@ load("/lib/validation.star", "hours", "is_dns_label", "is_dns_name", "is_email", "is_host_port", "is_hours")
 
+#@ def renewal_before_expiry(values):
+#@   private_ca = values["issuers"]["private_ca"]
+#@   if not is_hours(private_ca["duration"]) or not is_hours(private_ca["renew_before"]):
+#@     return True
+#@   end
+#@   return hours(private_ca["renew_before"]) < hours(private_ca["duration"])
+#@ end
+
+#@ def default_issuer_available(values):
+#@   issuers = values["issuers"]
+#@   return issuers["default_issuer"] != "kadras-ca-issuer" or issuers["private_ca"]["enabled"]
+#@ end
+
+#@ def is_dns01(ctx, providers=None):
+#@   letsencrypt = ctx.root["issuers"]["letsencrypt"]
+#@   if not letsencrypt["enabled"] or letsencrypt["solver"] != "dns01":
+#@     return False
+#@   end
+#@   return providers == None or letsencrypt["dns01"]["provider"] in providers
+#@ end
+
+#@data/values-schema
+#@schema/validation ("`issuers.private_ca.renew_before` to be shorter than `issuers.private_ca.duration`", renewal_before_expiry), ("`issuers.default_issuer` to be changed when `issuers.private_ca.enabled` is false, since `kadras-ca-issuer` isn't included", default_issuer_available)
 ---
+
+#@schema/desc "The namespace in which to deploy cert-manager. It's also where ClusterIssuers look for their Secrets and where leader election happens."
+#@schema/validation ("a valid DNS label", is_dns_label)
+namespace: cert-manager
+
+#! =============================================
+#! Components
+#! =============================================
+
+#@schema/desc "Settings for the cert-manager controller, which reconciles Certificates and Issuers."
+controller:
+  #@schema/desc "The number of controller replicas. Additional replicas are hot standby via leader election: 2 are recommended for production. With more than 1 replica, a PodDisruptionBudget is created."
+  #@schema/validation min=1
+  replicas: 1
+  #@schema/desc "Controller configuration, merged on top of the one computed by the package. See https://cert-manager.io/docs/reference/api-docs/#controller.config.cert-manager.io/v1alpha1.ControllerConfiguration."
+  #@schema/type any=True
+  config: {}
+
+#@schema/desc "Settings for the cert-manager cainjector, which injects CA bundles into webhooks, APIServices, and CRDs."
+cainjector:
+  #@schema/desc "The number of cainjector replicas. Additional replicas are hot standby via leader election: 2 are recommended for production. With more than 1 replica, a PodDisruptionBudget is created."
+  #@schema/validation min=1
+  replicas: 1
+  #@schema/desc "cainjector configuration, merged on top of the one computed by the package. See https://cert-manager.io/docs/reference/api-docs/#cainjector.config.cert-manager.io/v1alpha1.CAInjectorConfiguration."
+  #@schema/type any=True
+  config: {}
+
+#@schema/desc "Settings for the cert-manager webhook, which validates and mutates cert-manager resources."
+webhook:
+  #@schema/desc "The number of webhook replicas. All replicas serve requests: 3 are recommended for production. With more than 1 replica, a PodDisruptionBudget is created."
+  #@schema/validation min=1
+  replicas: 1
+  #@schema/desc "Webhook configuration, merged on top of the one computed by the package. See https://cert-manager.io/docs/reference/api-docs/#webhook.config.cert-manager.io/v1alpha1.WebhookConfiguration."
+  #@schema/type any=True
+  config: {}
+
+#! =============================================
+#! Gateway API
+#! =============================================
+
+#@schema/desc "Settings for the Kubernetes Gateway API support. See https://cert-manager.io/docs/usage/gateway."
+gateway_api:
+  #@schema/desc "Whether to issue certificates for annotated Gateways, and to solve the Let's Encrypt HTTP-01 challenges via `issuers.letsencrypt.http01.gateway` instead of an Ingress. The Gateway API CRDs must be installed before cert-manager starts."
+  enabled: false
+
+#! =============================================
+#! Issuers
+#! =============================================
+
+#@schema/desc "Settings for the ClusterIssuers included in the package."
+issuers:
+  #@schema/desc "A private certificate authority: the `kadras-ca-issuer` ClusterIssuer signs certificates with the `kadras-root-ca` self-signed CA."
+  private_ca:
+    #@schema/desc "Whether to include the private CA and its ClusterIssuer."
+    enabled: true
+    #@schema/desc "How long the CA certificate is valid, in hours."
+    #@schema/validation ("a number of hours, like `8760h`", is_hours)
+    duration: 8760h
+    #@schema/desc "How long before expiry the CA certificate is renewed, in hours."
+    #@schema/validation ("a number of hours, like `360h`", is_hours)
+    renew_before: 360h
+
+  #@schema/desc "Let's Encrypt, via the ACME protocol. The ClusterIssuer is named `letsencrypt-staging-issuer` or `letsencrypt-prod-issuer`, depending on `environment`."
+  letsencrypt:
+    #@schema/desc "Whether to include a ClusterIssuer for Let's Encrypt."
+    enabled: false
+    #@schema/desc "The Let's Encrypt environment. Use `staging` for testing, since `production` enforces strict rate limits."
+    #@schema/validation one_of=["staging", "production"]
+    environment: staging
+    #@schema/desc "The email address registered with the Let's Encrypt account, used as a contact for account issues. Optional."
+    #@schema/validation ("a valid email address", lambda v: v == "" or is_email(v))
+    email: ""
+    #@schema/desc "The challenge type used to prove control of the domains. `dns01` is required for wildcard certificates."
+    #@schema/validation one_of=["http01", "dns01"]
+    solver: http01
+
+    #@schema/desc "Settings for the HTTP-01 challenge, solved by serving a token over HTTP on port 80 of each domain."
+    http01:
+      #@schema/desc "The IngressClass of the Ingress created to solve the challenge, when `gateway_api.enabled` is false. The default is the one of the Kadras Contour package."
+      #@schema/validation min_len=1
+      ingress_class: contour
+      #@schema/desc "The Gateway to attach the HTTPRoute solving the challenge to, when `gateway_api.enabled` is true. It needs a listener for HTTP on port 80. The default is the one of the Kadras Contour package."
+      gateway:
+        #@schema/desc "The name of the Gateway."
+        #@schema/validation ("a valid DNS name", is_dns_name)
+        name: contour
+        #@schema/desc "The namespace of the Gateway."
+        #@schema/validation ("a valid DNS label", is_dns_label)
+        namespace: projectcontour
+
+    #@schema/desc "Settings for the DNS-01 challenge, solved by creating a TXT record in the DNS zone of each domain."
+    dns01:
+      #@schema/desc "The DNS provider. `hetzner` requires the Kadras cert-manager-webhook-hetzner package. `webhook` supports any provider with a cert-manager webhook. See https://cert-manager.io/docs/configuration/acme/dns01."
+      #@schema/validation one_of=["hetzner", "cloudflare", "rfc2136", "webhook"]
+      provider: hetzner
+      #@schema/desc "The Secret with the credentials for the DNS provider: the API token for `hetzner` and `cloudflare`, the TSIG secret for `rfc2136`. When it's not in the package namespace, it's synced there via secretgen-controller."
+      credentials:
+        #@schema/desc "The name of the Secret."
+        #@schema/validation ("a valid DNS name", is_dns_name), when=lambda _, ctx: is_dns01(ctx, ["hetzner", "cloudflare", "rfc2136"])
+        secret: ""
+        #@schema/desc "The key in the Secret holding the credentials."
+        #@schema/validation min_len=1, when=lambda _, ctx: is_dns01(ctx, ["hetzner", "cloudflare", "rfc2136"])
+        key: ""
+        #@schema/desc "The namespace of the Secret."
+        #@schema/validation ("a valid DNS label", is_dns_label)
+        namespace: kadras-system
+      #@schema/desc "Settings for the `rfc2136` provider, for authoritative DNS servers supporting dynamic updates, like BIND, PowerDNS, and Knot."
+      rfc2136:
+        #@schema/desc "The address of the authoritative DNS server, in the form `<host>:<port>`."
+        #@schema/examples ("DNS server", "ns1.example.com:53")
+        #@schema/validation ("an address like `ns1.example.com:53`", is_host_port), when=lambda _, ctx: is_dns01(ctx, ["rfc2136"])
+        nameserver: ""
+        #@schema/desc "The name of the TSIG key used to authenticate the updates."
+        #@schema/validation min_len=1, when=lambda _, ctx: is_dns01(ctx, ["rfc2136"])
+        tsig_key_name: ""
+        #@schema/desc "The algorithm of the TSIG key."
+        #@schema/validation one_of=["HMACMD5", "HMACSHA1", "HMACSHA256", "HMACSHA512"]
+        tsig_algorithm: HMACSHA512
+      #@schema/desc "Settings for the `webhook` provider. See https://cert-manager.io/docs/configuration/acme/dns01/webhook."
+      webhook:
+        #@schema/desc "The API group of the webhook solver."
+        #@schema/examples ("OVH", "acme.mycompany.com")
+        #@schema/validation ("a valid DNS name", is_dns_name), when=lambda _, ctx: is_dns01(ctx, ["webhook"])
+        group_name: ""
+        #@schema/desc "The name of the webhook solver."
+        #@schema/examples ("OVH", "ovh")
+        #@schema/validation min_len=1, when=lambda _, ctx: is_dns01(ctx, ["webhook"])
+        solver_name: ""
+        #@schema/desc "The configuration for the webhook solver, specific to each provider."
+        #@schema/type any=True
+        config: {}
+      #@schema/desc "The recursive DNS servers used to check that the TXT records have propagated, as `<host>:<port>` or DNS-over-HTTPS URLs. If empty, the ones in the controller's `/etc/resolv.conf` are used."
+      #@schema/examples ("Public resolvers", ["1.1.1.1:53", "9.9.9.9:53"])
+      recursive_nameservers:
+      - ""
+      #@schema/desc "Whether to only query `recursive_nameservers` to check the TXT records, instead of the authoritative servers of the zone. Useful when the authoritative servers aren't reachable, at the cost of slower checks due to caching."
+      recursive_nameservers_only: false
+
+  #@schema/desc "The ClusterIssuer used for Ingresses annotated with `kubernetes.io/tls-acme: \"true\"` and no issuer annotation. Set it to `\"\"` to disable it."
+  #@schema/examples ("Let's Encrypt", "letsencrypt-prod-issuer")
+  #@schema/validation ("a valid DNS name", lambda v: v == "" or is_dns_name(v))
+  default_issuer: kadras-ca-issuer
+
+#! =============================================
+#! Observability
+#! =============================================
+
+#@schema/desc "Settings for logs and metrics."
+observability:
+  logging:
+    #@schema/desc "The log level for all the components."
+    #@schema/validation one_of=["info", "debug", "trace"]
+    level: info
+    #@schema/desc "The log format for all the components."
+    #@schema/validation one_of=["text", "json"]
+    format: text
+  metrics:
+    #@schema/desc "Whether to annotate the Pods for Prometheus scraping. All the components expose metrics on port 9402."
+    enabled: true
+
+#! =============================================
+#! Security
+#! =============================================
+
+#@schema/desc "Settings for the security of the package workloads."
+security:
+  #@schema/desc "Whether to deny the inbound traffic to the cert-manager Pods, except for the webhook requests from the Kubernetes API server and the metrics scraping."
+  network_policies: false
 
 #@schema/desc "Settings for the Kyverno policies."
 policies:
-  #@schema/desc "Whether to include the out-of-the-box Kyverno policies to validate and secure the package installation."
-  include: false
+  #@schema/desc "Whether to include Kyverno policies verifying the signatures of the cert-manager images. Kyverno must be installed in the cluster."
+  enabled: false
 
-#@schema/desc "Settings for the corporate proxy."
+#@schema/desc "Settings for the corporate proxy, used by the controller to reach the ACME servers and the DNS providers."
 proxy:
-  #@schema/desc "The HTTPS proxy to use for network traffic."
-  https_proxy: ""
-  #@schema/desc "The HTTP proxy to use for network traffic."
+  #@schema/desc "The proxy for HTTP traffic."
   http_proxy: ""
+  #@schema/desc "The proxy for HTTPS traffic."
+  https_proxy: ""
   #@schema/desc "A comma-separated list of hostnames, IP addresses, or IP ranges in CIDR format that should not use the proxy."
+  #@schema/examples ("Cluster traffic", ".svc,.cluster.local,10.0.0.0/8")
   no_proxy: ""
-
-#@schema/desc "Settings for the cert-manager controller."
-controller:
-  #@schema/desc "Number of the log level verbosity."
-  #@schema/validation min=1,max=5
-  loglevel: 2
-  #@schema/desc "The number of replicas. In order to enable high availability, 2 replicas are recommended."
-  #@schema/validation min=1
-  replicas: 1
-  #@schema/desc "Configures the behaviour of the ACME DNS01 challenge solver."
-  dns01:
-    #@schema/desc "Each nameserver can be either the IP address and port of a standard recursive DNS server, or the endpoint to an RFC 8484 DNS over HTTPS endpoint."
-    recursive_nameservers:
-      - ""
-    #@schema/desc "When true, cert-manager will only ever query the configured DNS resolvers to perform the ACME DNS01 self check. This is useful in DNS constrained environments, where access to authoritative nameservers is restricted. Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers."
-    recursive_nameservers_only: false
-
-#@schema/desc "Settings for the cainjector controller."
-cainjector:
-  #@schema/desc "Number of the log level verbosity."
-  #@schema/validation min=1,max=5
-  loglevel: 2
-  #@schema/desc "The number of replicas. In order to enable high availability, 2 replicas are recommended."
-  #@schema/validation min=1
-  replicas: 1
-
-#@schema/desc "Settings for the cert-manager webhook."
-webhook:
-  #@schema/desc "Number of the log level verbosity."
-  #@schema/validation min=1,max=5
-  loglevel: 2
-  #@schema/desc "The number of replicas. In order to enable high availability, at least 3 replicas are recommended."
-  #@schema/validation min=1
-  replicas: 1
-  #@schema/desc "Whether to run the webhook in the host network so that it can be reached by the cert-manager controller in environments like AWS EKS. More information: https://cert-manager.io/docs/installation/compatibility."
-  host_network: false
-  #@schema/desc "The port where the webhook is exposed. The default port needs changing in environments like AWS EKS and AWS Fargate. More information: https://cert-manager.io/docs/installation/compatibility."
-  secure_port: 6443
-
-#@schema/desc "Settings for Gateway API support."
-gateway_api:
-  #@schema/desc "Whether gateway API integration is enabled within cert-manager."
-  enable: false
-
-#@schema/desc "Leader election configuration for the cert-manager and cert-manager-cainjector Deployments."
-leader_election:
-  #@schema/desc "Namespace used to perform leader election. The default namespace needs changing in environments like GKE. More information: https://cert-manager.io/docs/installation/compatibility."
-  #@schema/validation min_len=1
-  namespace: kube-system
-
-#@schema/desc "Settings for Prometheus metrics."
-prometheus:
-  #@schema/desc "Whether to enable the Prometheus annotations for automatic scraping of cert-manager metrics."
-  enabled: true
-
-#@schema/desc "Settings for the built-in, private PKI"
-private_pki:
-  #@schema/desc "Whether to include a ClusterIssuer for a private PKI."
-  include: true
-
-#@schema/desc "Settings for Let's Encrypt."
-letsencrypt:
-  #@schema/desc "Whether to include a ClusterIssuer for Let's Encrypt."
-  include: false
-  #@schema/desc "Whether to use Let's Encrypt staging (recommended for non-production environments) or production."
-  production: false
-  #@schema/desc "The email address that Let's Encrypt will use to send info on expiring certificates or other issues."
-  #@schema/validation min_len=5, when=lambda _, ctx: ctx.parent["include"]
-  email: ""
-  challenge:
-    #@schema/desc "The type of challenge used by the ACME CA Server. Valid options: `http01`, `dns01`."
-    #@schema/validation one_of=["http01", "dns01"]
-    type: http01
-    secret:
-      #@schema/desc "Name of the Secret containing the credentials needed for the dns01 challenge."
-      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
-      name: ""
-      #@schema/desc "The key within the Secret that contains the credentials needed for the dns01 challenge."
-      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
-      key: ""
-      #@schema/desc "Namespace containing the Secret with the credentials needed for the dns01 challenge."
-      #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
-      namespace: kadras-system
-    #@schema/desc "The DNS provider to use for the ACME dns01 challenge. Valid options: `cloudflare`, `digital_ocean`, `hetzner`."
-    #@schema/validation min_len=1, when=lambda _, ctx: ctx.root["letsencrypt"]["challenge"]["type"] == "dns01"
-    #@schema/validation one_of=["cloudflare", "digital_ocean", "hetzner"]
-    dns_provider: hetzner

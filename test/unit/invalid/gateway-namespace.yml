@@ -1,0 +1,7 @@
+# expected: a valid DNS label
+---
+issuers:
+  letsencrypt:
+    http01:
+      gateway:
+        namespace: ""

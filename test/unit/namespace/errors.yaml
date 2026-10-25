@@ -1,0 +1,30 @@
+# Nothing is left in the upstream namespaces.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: cert-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: cert-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: cert-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+subjects:
+- namespace: cert-manager

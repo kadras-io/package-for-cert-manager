@@ -1,0 +1,93 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+#@ load("/lib/cert_manager.star", "cainjector_config", "component_labels", "component_values", "components", "controller_config", "webhook_config", "webhook_secure_port")
+
+#! Each component reads its configuration from a file, mounted from a ConfigMap, instead of from flags.
+#! The configuration is computed from the package values, then `<component>.config` is merged on top, so its keys take precedence.
+#! See: https://cert-manager.io/docs/installation/configuring-components/
+#!
+#! The components only read their configuration at startup. The ConfigMaps are versioned by kapp,
+#! so that a change creates a new ConfigMap and rolls out the Deployment referencing it.
+#! See: https://carvel.dev/kapp/docs/latest/diff/#versioned-resources
+
+#@ computed_configs = {
+#@   "controller": controller_config(),
+#@   "cainjector": cainjector_config(),
+#@   "webhook": webhook_config(),
+#@ }
+
+#! The webhook serving certificate is configured via flags, since they reference the Pod namespace.
+#@ extra_args = {
+#@   "webhook": [
+#@     "--dynamic-serving-ca-secret-namespace=$(POD_NAMESPACE)",
+#@     "--dynamic-serving-ca-secret-name=cert-manager-webhook-ca",
+#@     "--dynamic-serving-dns-names=cert-manager-webhook",
+#@     "--dynamic-serving-dns-names=cert-manager-webhook.$(POD_NAMESPACE)",
+#@     "--dynamic-serving-dns-names=cert-manager-webhook.$(POD_NAMESPACE).svc",
+#@   ],
+#@ }
+
+#@ for component in components():
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: #@ component.deployment
+  namespace: #@ data.values.namespace
+  labels: #@ component_labels(component)
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/num-versions: "5"
+data:
+  config.yaml: #@ computed_configs[component.key]
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata":{"name":component.deployment}})
+---
+data:
+  #@overlay/match-child-defaults missing_ok=True
+  config.yaml: #@ component_values(component).config
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata":{"name":component.deployment}})
+---
+data:
+  #@overlay/replace via=lambda left, _: yaml.encode(left)
+  config.yaml:
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":component.deployment}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: #@ component.container
+          #@overlay/replace
+          args: #@ ["--config=/var/cert-manager/config/config.yaml"] + extra_args.get(component.key, [])
+          #@overlay/match missing_ok=True
+          volumeMounts:
+            - name: config
+              mountPath: /var/cert-manager/config
+              readOnly: true
+      #@overlay/match missing_ok=True
+      volumes:
+        - name: config
+          configMap:
+            name: #@ component.deployment
+
+#@ end
+
+#! The webhook Service targets the `https` port by name, so it follows the configured port.
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"cert-manager-webhook"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: cert-manager-webhook
+          ports:
+            #@overlay/match by="name"
+            - name: https
+              containerPort: #@ webhook_secure_port()

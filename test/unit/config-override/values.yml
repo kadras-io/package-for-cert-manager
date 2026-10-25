@@ -1,0 +1,11 @@
+---
+controller:
+  config:
+    maxConcurrentChallenges: 120
+    featureGates:
+      ACMEUseARI: true
+    logging:
+      verbosity: 3
+webhook:
+  config:
+    securePort: 10260

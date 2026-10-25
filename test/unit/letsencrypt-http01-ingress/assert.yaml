@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: security@kadras.io
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: contour
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    ingressShimConfig:
+      defaultIssuerName: letsencrypt-prod-issuer
+      defaultIssuerKind: ClusterIssuer
+      defaultIssuerGroup: cert-manager.io

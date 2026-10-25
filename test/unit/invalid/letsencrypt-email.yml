@@ -1,0 +1,6 @@
+# expected: a valid email address
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    email: kadras.io

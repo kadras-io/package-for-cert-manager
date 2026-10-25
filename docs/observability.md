@@ -1,33 +1,47 @@
-# Configuring Observability
-
-Monitor and observe the operation of cert-manager using metrics.
+# Observability
 
 ## Logs
 
-The log verbosity for all cert-manager containers can be configured.
+The log level and format apply to all the cert-manager components.
 
 ```yaml
-controller:
-  loglevel: 2
-cainjector:
-  loglevel: 2
-webhook:
-  loglevel: 2
+observability:
+  logging:
+    level: info
+    format: json
 ```
+
+* `level` is one of `info`, `debug`, `trace`. They map to the verbosity levels 2, 4, and 6 used by cert-manager.
+* `format` is one of `text` and `json`.
 
 ## Metrics
 
-The cert-manager controller produces Prometheus metrics by default. This package comes pre-configured with the necessary annotations to let Prometheus scrape metrics automatically from the cert-manager controller.
-
-If you'd like to remove the Prometheus annotations and therefore disable automatic scraping of cert-manager metrics, you can apply the following configuration:
+All the components expose metrics in the Prometheus format on port 9402 (`/metrics`). By default, their Pods are annotated for Prometheus scraping (`prometheus.io/scrape`, `prometheus.io/port`, `prometheus.io/path`). To remove the annotations:
 
 ```yaml
-prometheus:
-  enabled: false
+observability:
+  metrics:
+    enabled: false
 ```
 
-For more information, check the cert-manager documentation for [metrics](https://cert-manager.io/docs/devops-tips/prometheus-metrics/).
+If you use the Prometheus Operator, create a PodMonitor instead:
 
-## Dashboards
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: cert-manager
+  podMetricsEndpoints:
+    - port: http-metrics
+```
 
-If you use the Grafana observability stack, you can refer to this [dashboard](https://monitoring.mixins.dev/grafana/) as a foundation to build your own.
+The most useful metrics are about the certificates, like `certmanager_certificate_expiration_timestamp_seconds` and `certmanager_certificate_ready_status`. See [Prometheus metrics](https://cert-manager.io/docs/devops-tips/prometheus-metrics/).
+
+## Dashboards and alerts
+
+The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) provides a Grafana dashboard and alerts, like certificates about to expire or not ready.

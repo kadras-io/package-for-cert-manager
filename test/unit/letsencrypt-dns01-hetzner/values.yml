@@ -1,0 +1,14 @@
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: dns01
+    dns01:
+      provider: hetzner
+      credentials:
+        secret: hetzner-dns
+        key: api-token
+      recursive_nameservers:
+      - 1.1.1.1:53
+      - 9.9.9.9:53
+      recursive_nameservers_only: true

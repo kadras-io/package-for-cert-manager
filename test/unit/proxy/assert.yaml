@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      (containers[?name == 'cert-manager-controller'] | [0]):
+        (env[?name == 'HTTPS_PROXY'] | [0].value): http://proxy.kadras.io:3128
+        (env[?name == 'NO_PROXY'] | [0].value): .svc,.cluster.local
+        (env[?name == 'HTTP_PROXY'] | length(@)): 0
+        (env[?name == 'POD_NAMESPACE'] | length(@)): 1

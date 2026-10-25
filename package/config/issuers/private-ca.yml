@@ -1,6 +1,13 @@
 #@ load("@ytt:data", "data")
 
-#@ if data.values.private_pki.include:
+#! A private CA: a self-signed root certificate, used by the `kadras-ca-issuer` ClusterIssuer to sign certificates.
+#! The root certificate is renewed by cert-manager, but the certificates it signed aren't re-issued:
+#! they keep their validity until their own renewal. Trust in the CA can be distributed with trust-manager.
+#! See: https://cert-manager.io/docs/configuration/ca/
+
+#@ private_ca = data.values.issuers.private_ca
+
+#@ if private_ca.enabled:
 
 ---
 apiVersion: cert-manager.io/v1
@@ -15,13 +22,13 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: kadras-root-ca
-  namespace: cert-manager
+  namespace: #@ data.values.namespace
 spec:
   isCA: true
   commonName: kadras
   secretName: kadras-root-ca
-  duration: 8760h #! 365 days
-  renewBefore: 360h #! 15 days
+  duration: #@ private_ca.duration
+  renewBefore: #@ private_ca.renew_before
   subject:
     organizations:
     - kadras
@@ -33,6 +40,7 @@ spec:
     kind: ClusterIssuer
     group: cert-manager.io
 
+#! ClusterIssuers read their Secrets from the cluster resource namespace, which is the package namespace.
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

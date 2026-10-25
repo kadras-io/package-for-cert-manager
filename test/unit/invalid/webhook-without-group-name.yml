@@ -1,0 +1,10 @@
+# expected: a valid DNS name
+---
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: dns01
+    dns01:
+      provider: webhook
+      webhook:
+        solver_name: ovh

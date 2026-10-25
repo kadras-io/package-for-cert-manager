@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    kind: ControllerConfiguration
+    clusterResourceNamespace: cert-manager
+    leaderElectionConfig:
+      namespace: cert-manager
+    logging:
+      verbosity: 2
+      format: text
+    gatewayAPI:
+      enabled: false
+    ingressShimConfig:
+      defaultIssuerName: kadras-ca-issuer
+      defaultIssuerKind: ClusterIssuer
+      defaultIssuerGroup: cert-manager.io
+    acmeHTTP01Config:
+      # Read from the upstream manifest, so that it matches the version of the controller.
+      (starts_with(solverImage, 'quay.io/jetstack/cert-manager-acmesolver:v')): true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager-cainjector
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    kind: CAInjectorConfiguration
+    leaderElectionConfig:
+      namespace: cert-manager
+    logging:
+      verbosity: 2
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+data:
+  (parse_yaml("config.yaml")):
+    kind: WebhookConfiguration
+    securePort: 10250
+    logging:
+      verbosity: 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      priorityClassName: system-cluster-critical
+      automountServiceAccountToken: false
+      (topologySpreadConstraints == null): true
+      imagePullSecrets:
+      - name: canonical-registry-credentials
+      (containers[?name == 'cert-manager-controller'] | [0]):
+        args:
+        - --config=/var/cert-manager/config/config.yaml
+        (env[?name == 'HTTPS_PROXY'] | length(@)): 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  replicas: 1
+  template:
+    spec:
+      priorityClassName: system-cluster-critical
+      (containers[?name == 'cert-manager-webhook'] | [0]):
+        (contains(args, '--config=/var/cert-manager/config/config.yaml')): true
+        (contains(args, '--dynamic-serving-ca-secret-name=cert-manager-webhook-ca')): true
+        (ports[?name == 'https'] | [0].containerPort): 10250
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: cert-manager
+spec:
+  replicas: 1
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-manager:leaderelection
+  namespace: cert-manager
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+automountServiceAccountToken: false
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kadras-bootstrap-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kadras-root-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  secretName: kadras-root-ca
+  duration: 8760h
+  renewBefore: 360h
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kadras-ca-issuer
+spec:
+  ca:
+    secretName: kadras-root-ca
