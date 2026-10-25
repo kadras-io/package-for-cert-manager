@@ -1,13 +1,16 @@
-apiVersion: kyverno.io/v1
-kind: Policy
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
 metadata:
   name: cert-manager-verify-image
   namespace: cert-manager
 spec:
-  (validationFailureAction == null): true
-  rules:
-  - name: verify-signature
-    verifyImages:
-    - failureAction: Enforce
-      imageReferences:
-      - quay.io/jetstack/cert-manager*
+  validationActions:
+  - Deny
+  matchImageReferences:
+  - glob: quay.io/jetstack/cert-manager*
+  attestors:
+  - name: cosign
+    cosign:
+      key:
+        (starts_with(data, '-----BEGIN PUBLIC KEY-----')): true
+        hashAlgorithm: sha512

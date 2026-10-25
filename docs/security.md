@@ -83,7 +83,7 @@ The Pods solving the ACME HTTP-01 challenges are labelled `app.kubernetes.io/par
 
 ## Kyverno policies
 
-The package can include [Kyverno](https://github.com/kadras-io/package-for-kyverno) policies to verify the signatures of the cert-manager images, signed with the [cert-manager key](https://cert-manager.io/docs/installation/code-signing/). Kyverno 1.13 or later must be installed in the cluster.
+The package can include [Kyverno](https://github.com/kadras-io/package-for-kyverno) policies to verify the signatures of the cert-manager images, signed with the [cert-manager key](https://cert-manager.io/docs/installation/code-signing/). The package defines them as [ImageValidatingPolicies](https://kyverno.io/docs/policy-types/image-validating-policy/) in its namespace, so Kyverno 1.19 or later must be installed in the cluster.
 
 ```yaml
 policies:

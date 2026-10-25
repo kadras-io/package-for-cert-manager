@@ -1,7 +1,7 @@
 # Policies - Kyverno
 ---
-apiVersion: kyverno.io/v1
-kind: Policy
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
 metadata:
   name: cert-manager-verify-image
   namespace: cert-manager

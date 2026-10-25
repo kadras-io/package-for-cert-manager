@@ -2,8 +2,8 @@
 
 #@ if data.values.policies.enabled:
 ---
-apiVersion: kyverno.io/v1
-kind: Policy
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
 metadata:
   name: cert-manager-verify-image
   namespace: #@ data.values.namespace
@@ -12,45 +12,54 @@ metadata:
     policies.kyverno.io/category: Software Supply Chain Security
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
-    policies.kyverno.io/minversion: 1.13.0
+    policies.kyverno.io/minversion: 1.19.0
     policies.kyverno.io/description: >-
       Using the Cosign project, this policy checks all container images used by this package
-      to ensure they have been signed by verifying their signatures against the provided public key. 
+      to ensure they have been signed by verifying their signatures against the provided public key.
 spec:
-  webhookTimeoutSeconds: 30
-  rules:
-    - name: verify-signature
-      match:
-        any:
-        - resources:
-            kinds:
-              - Pod
-      verifyImages:
-      - failureAction: Enforce
-        imageReferences:
-        - "quay.io/jetstack/cert-manager*"
-        attestors:
-        - entries:
-          - keys:
-              #! https://cert-manager.io/docs/installation/code-signing
-              #! https://cert-manager.io/public-keys/cert-manager-pubkey-2021-09-20.pem
-              publicKeys: |
-                -----BEGIN PUBLIC KEY-----
-                MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsZZKaaIRjOpzbiWYIDKO
-                yry9XGBqAfve1iOGmt5VO1jpjNoEseT6zewozHfWTM7osxayy2WjN8G+QV39MlT3
-                Vxo91/31g+Zcq8KcvxG+iB8GRaD9pNgLmghorv+eYDiPYMO/+fhsLImyG5WEoPct
-                MeCBD7umZ/A2t96U9DQxVDqQbTHlsNludno1p1wsgRnfUM3QHexNljDvJg5FcDMo
-                dCpVLpRNvbw0lbJVfybJ4siJ5o/MmXzy0QCJpw+yMIqvqMc8qgKJ1yooJtuTVF4t
-                4/luP+EG/oVIiSWCFeRMqYdbJ3R+CJi+4LN7vFNYQM1Q/NwOB52RteaR7wnqmcBz
-                qSYK32MM8xdPCQ5tioWwnPTRbPZuzsZsRmJsKBO9JUrBYdDntZX1xY5g4QNSufxi
-                QgJgJSU7E4VGMvagEzB1JzvOr6A/qNFCO1Z6JsA3jw3cJLV1rSHfxqfSXBACTLDf
-                6bOPWRILRKydTJA6uLKNKmo1/nFm3jvd5tHKOjy4VAQLJ/Vx9wBsAAiLa+06veun
-                Oz3AJ9sNh3wLp21RL11u9TuOKRBipE/TYsBYp8jpIyWPXDSV+JcD/TZqoT8y0Z6S
-                0damfUmspuK9DTQFL2crpeaqJSG9RA+OuPZLxGD1IMURTsPJB7kXhPtmceeirBnw
-                sVcRHHDitVt8oO/x4Wus1c0CAwEAAQ==
-                -----END PUBLIC KEY-----
-              signatureAlgorithm: sha512
-              rekor:
-                url: https://rekor.sigstore.dev
-                ignoreTlog: true
+  webhookConfiguration:
+    timeoutSeconds: 30
+  #! Image verification only makes sense when Pods are admitted.
+  evaluation:
+    background:
+      enabled: false
+  validationActions:
+    - Deny
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  matchImageReferences:
+    - glob: "quay.io/jetstack/cert-manager*"
+  attestors:
+    - name: cosign
+      cosign:
+        key:
+          #! https://cert-manager.io/docs/installation/code-signing
+          #! https://cert-manager.io/public-keys/cert-manager-pubkey-2021-09-20.pem
+          data: |
+            -----BEGIN PUBLIC KEY-----
+            MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsZZKaaIRjOpzbiWYIDKO
+            yry9XGBqAfve1iOGmt5VO1jpjNoEseT6zewozHfWTM7osxayy2WjN8G+QV39MlT3
+            Vxo91/31g+Zcq8KcvxG+iB8GRaD9pNgLmghorv+eYDiPYMO/+fhsLImyG5WEoPct
+            MeCBD7umZ/A2t96U9DQxVDqQbTHlsNludno1p1wsgRnfUM3QHexNljDvJg5FcDMo
+            dCpVLpRNvbw0lbJVfybJ4siJ5o/MmXzy0QCJpw+yMIqvqMc8qgKJ1yooJtuTVF4t
+            4/luP+EG/oVIiSWCFeRMqYdbJ3R+CJi+4LN7vFNYQM1Q/NwOB52RteaR7wnqmcBz
+            qSYK32MM8xdPCQ5tioWwnPTRbPZuzsZsRmJsKBO9JUrBYdDntZX1xY5g4QNSufxi
+            QgJgJSU7E4VGMvagEzB1JzvOr6A/qNFCO1Z6JsA3jw3cJLV1rSHfxqfSXBACTLDf
+            6bOPWRILRKydTJA6uLKNKmo1/nFm3jvd5tHKOjy4VAQLJ/Vx9wBsAAiLa+06veun
+            Oz3AJ9sNh3wLp21RL11u9TuOKRBipE/TYsBYp8jpIyWPXDSV+JcD/TZqoT8y0Z6S
+            0damfUmspuK9DTQFL2crpeaqJSG9RA+OuPZLxGD1IMURTsPJB7kXhPtmceeirBnw
+            sVcRHHDitVt8oO/x4Wus1c0CAwEAAQ==
+            -----END PUBLIC KEY-----
+          hashAlgorithm: sha512
+        #! The cert-manager images are signed with a key and not uploaded to the Rekor transparency log.
+        ctlog:
+          insecureIgnoreTlog: true
+  validations:
+    - expression: >-
+        images.containers.map(image, verifyImageSignatures(image, [attestors.cosign])).all(e, e > 0)
+      message: The cert-manager images must be signed with the cert-manager key.
 #@ end

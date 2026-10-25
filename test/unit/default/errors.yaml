@@ -22,8 +22,8 @@ metadata:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 ---
-apiVersion: kyverno.io/v1
-kind: Policy
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
 ---
 apiVersion: secretgen.carvel.dev/v1alpha1
 kind: SecretImport
