@@ -42,6 +42,43 @@ spec:
               kubernetes.io/metadata.name: observability
 ```
 
+### Outbound traffic
+
+The package doesn't restrict the outbound traffic, since its destinations depend on the cluster and the issuers:
+
+* all the components reach the Kubernetes API server (usually on port 443 or 6443) and the cluster DNS (port 53);
+* the controller also reaches the ACME servers and the DNS providers (port 443), the domains being validated for the HTTP-01 self-check (port 80), the RFC2136 nameserver, and the corporate proxy, if any.
+
+To restrict it, create your own NetworkPolicies in the package namespace: they add up to the ones of the package. For example, to only allow the cainjector and the webhook to reach the cluster DNS and the Kubernetes API server, adjusting the API server ports to your cluster:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cert-manager-cainjector-webhook-egress
+  namespace: cert-manager
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: cert-manager
+    matchExpressions:
+    - key: app.kubernetes.io/component
+      operator: In
+      values: [cainjector, webhook]
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 6443
+```
+
 The Pods solving the ACME HTTP-01 challenges are labelled `app.kubernetes.io/part-of: cert-manager-acme-solver`, so that your network policies in the namespaces of the Certificates can allow traffic to them.
 
 ## Kyverno policies
