@@ -11,7 +11,7 @@ A Carvel package for [cert-manager](https://cert-manager.io), a cloud-native sol
 ## ✨&nbsp; What's Included
 
 * **Private CA**. The `kadras-ca-issuer` ClusterIssuer, signing certificates with a self-signed root CA managed by cert-manager.
-* **Let's Encrypt**. An optional ClusterIssuer solving HTTP-01 challenges via Ingress or Gateway API, or DNS-01 challenges via Hetzner, Cloudflare, RFC2136, or any cert-manager webhook.
+* **Let's Encrypt**. An optional ClusterIssuer solving HTTP-01 challenges via Gateway API HTTPRoutes, or DNS-01 challenges via Hetzner, Cloudflare, RFC2136, or any cert-manager webhook.
 * **Gateway API**. Certificates for annotated Gateways, and HTTP-01 challenges solved via HTTPRoutes.
 * **High availability**. Configurable replicas, protected by PodDisruptionBudgets and spread across nodes, running with the `system-cluster-critical` priority.
 * **Observability**. Structured logs and Prometheus metrics.
@@ -32,7 +32,9 @@ kapp deploy -a kapp-controller -y \
 
 ### Dependencies
 
-cert-manager has no required dependencies. Some features rely on other packages, which you can install from the [Kadras package repository](https://github.com/kadras-io/kadras-packages):
+cert-manager requires the [Gateway API](https://gateway-api.sigs.k8s.io) CRDs, since it issues certificates for Gateways and solves the HTTP-01 challenges via HTTPRoutes. Install them first with the [Gateway API](https://github.com/kadras-io/package-for-gateway-api) package: without them, the cert-manager controller fails to start. To use cert-manager without them, set `gateway_api.enabled` to false.
+
+Some features rely on other packages, which you can install from the [Kadras package repository](https://github.com/kadras-io/kadras-packages):
 
 * [secretgen-controller](https://github.com/kadras-io/package-for-secretgen-controller), to sync the DNS-01 credentials into the cert-manager namespace and to authenticate with private registries.
 * [cert-manager-webhook-hetzner](https://github.com/kadras-io/package-for-cert-manager-webhook-hetzner), to solve DNS-01 challenges with Hetzner.
@@ -116,6 +118,7 @@ Features:
 
 * [Issuers](docs/issuers.md)
 * [Gateway API](docs/gateway-api.md)
+* [Ingress](docs/ingress.md)
 * [High availability](docs/high-availability.md)
 * [Observability](docs/observability.md)
 * [Security](docs/security.md)
@@ -171,7 +174,7 @@ The cert-manager package has the following configurable properties.
 | `cainjector.config` | `{}` | cainjector configuration, merged on top of the one computed by the package. See https://cert-manager.io/docs/reference/api-docs/#cainjector.config.cert-manager.io/v1alpha1.CAInjectorConfiguration. |
 | `webhook.replicas` | `1` | The number of webhook replicas. All replicas serve requests: 3 are recommended for production. With more than 1 replica, a PodDisruptionBudget is created. |
 | `webhook.config` | `{}` | Webhook configuration, merged on top of the one computed by the package. See https://cert-manager.io/docs/reference/api-docs/#webhook.config.cert-manager.io/v1alpha1.WebhookConfiguration. |
-| `gateway_api.enabled` | `false` | Whether to issue certificates for annotated Gateways, and to solve the Let's Encrypt HTTP-01 challenges via `issuers.letsencrypt.http01.gateway` instead of an Ingress. The Gateway API CRDs must be installed before cert-manager starts. |
+| `gateway_api.enabled` | `true` | Whether to issue certificates for annotated Gateways, and to solve the Let's Encrypt HTTP-01 challenges via an HTTPRoute attached to `issuers.letsencrypt.http01.gateway`. The Gateway API CRDs must be installed before cert-manager starts, or the controller fails to start. |
 | `issuers.private_ca.enabled` | `true` | Whether to include the private CA and its ClusterIssuer. |
 | `issuers.private_ca.duration` | `"8760h"` | How long the CA certificate is valid, in hours. |
 | `issuers.private_ca.renew_before` | `"360h"` | How long before expiry the CA certificate is renewed, in hours. |
@@ -179,9 +182,8 @@ The cert-manager package has the following configurable properties.
 | `issuers.letsencrypt.environment` | `"staging"` | The Let's Encrypt environment. Use `staging` for testing, since `production` enforces strict rate limits. |
 | `issuers.letsencrypt.email` | `""` | The email address registered with the Let's Encrypt account, used as a contact for account issues. Optional. |
 | `issuers.letsencrypt.solver` | `"http01"` | The challenge type used to prove control of the domains. `dns01` is required for wildcard certificates. |
-| `issuers.letsencrypt.http01.ingress_class` | `"contour"` | The IngressClass of the Ingress created to solve the challenge, when `gateway_api.enabled` is false. The default is the one of the Kadras Contour package. |
-| `issuers.letsencrypt.http01.gateway.name` | `"contour"` | The name of the Gateway. |
-| `issuers.letsencrypt.http01.gateway.namespace` | `"projectcontour"` | The namespace of the Gateway. |
+| `issuers.letsencrypt.http01.gateway.name` | `"external"` | The name of the Gateway. |
+| `issuers.letsencrypt.http01.gateway.namespace` | `"envoy-gateway-system"` | The namespace of the Gateway. |
 | `issuers.letsencrypt.dns01.provider` | `"hetzner"` | The DNS provider. `hetzner` requires the Kadras cert-manager-webhook-hetzner package. `webhook` supports any provider with a cert-manager webhook. See https://cert-manager.io/docs/configuration/acme/dns01. |
 | `issuers.letsencrypt.dns01.credentials.secret` | `""` | The name of the Secret. |
 | `issuers.letsencrypt.dns01.credentials.key` | `""` | The key in the Secret holding the credentials. |
@@ -194,9 +196,8 @@ The cert-manager package has the following configurable properties.
 | `issuers.letsencrypt.dns01.webhook.config` | `{}` | The configuration for the webhook solver, specific to each provider. |
 | `issuers.letsencrypt.dns01.recursive_nameservers` | `[]` | The recursive DNS servers used to check that the TXT records have propagated, as `<host>:<port>` or DNS-over-HTTPS URLs. If empty, the ones in the controller's `/etc/resolv.conf` are used. |
 | `issuers.letsencrypt.dns01.recursive_nameservers_only` | `false` | Whether to only query `recursive_nameservers` to check the TXT records, instead of the authoritative servers of the zone. Useful when the authoritative servers aren't reachable, at the cost of slower checks due to caching. |
-| `issuers.default_issuer` | `"kadras-ca-issuer"` | The ClusterIssuer used for Ingresses annotated with `kubernetes.io/tls-acme: "true"` and no issuer annotation. Set it to `""` to disable it. |
 | `observability.logging.level` | `"info"` | The log level for all the components. |
-| `observability.logging.format` | `"text"` | The log format for all the components. |
+| `observability.logging.format` | `"json"` | The log format for all the components. |
 | `observability.metrics.enabled` | `true` | Whether to annotate the Pods for Prometheus scraping. All the components expose metrics on port 9402. |
 | `security.network_policies` | `false` | Whether to deny the inbound traffic to the cert-manager Pods, except for the webhook requests from the Kubernetes API server and the metrics scraping. |
 | `policies.enabled` | `false` | Whether to include Kyverno policies verifying the signatures of the cert-manager images. Kyverno must be installed in the cluster. |

@@ -11,7 +11,7 @@ data:
       ACMEUseARI: true
     logging:
       verbosity: 3
-      format: text
+      format: json
     clusterResourceNamespace: cert-manager
 ---
 apiVersion: v1

@@ -1,16 +1,18 @@
 # Gateway API
 
-cert-manager can issue certificates for the HTTPS listeners of [Gateways](https://gateway-api.sigs.k8s.io), and solve HTTP-01 challenges via HTTPRoutes. Enable it:
+cert-manager issues certificates for the HTTPS listeners of [Gateways](https://gateway-api.sigs.k8s.io), and solves HTTP-01 challenges via HTTPRoutes. The Gateway API support is enabled by default, since the Kadras platform exposes applications via the Gateway API. To issue certificates for Ingresses instead, see [ingress.md](ingress.md).
 
-```yaml
-gateway_api:
-  enabled: true
-```
-
-The Gateway API CRDs must be installed before cert-manager starts, for example by the [Contour package](https://github.com/kadras-io/package-for-contour). If you install them later, restart the controller:
+The Gateway API CRDs must be installed before cert-manager starts, for example by the [Gateway API package](https://github.com/kadras-io/package-for-gateway-api): otherwise, the controller fails to start. If you install them later, restart the controller:
 
 ```shell
 kubectl rollout restart deployment cert-manager -n cert-manager
+```
+
+To run cert-manager without the Gateway API CRDs, disable the support. The Let's Encrypt ClusterIssuer then requires the DNS-01 solver.
+
+```yaml
+gateway_api:
+  enabled: false
 ```
 
 ## Certificates for Gateways
@@ -25,7 +27,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-issuer
 spec:
-  gatewayClassName: contour
+  gatewayClassName: envoy
   listeners:
     - name: https
       hostname: my-app.example.com
@@ -39,11 +41,9 @@ spec:
 
 ## HTTP-01 challenges
 
-With the Gateway API support enabled, the Let's Encrypt ClusterIssuer solves the HTTP-01 challenges by attaching an HTTPRoute to a Gateway listening for HTTP on port 80, instead of creating an Ingress. By default, it's the `contour` Gateway in the `projectcontour` namespace, deployed by the Contour package, so no further configuration is needed.
+The Let's Encrypt ClusterIssuer solves the HTTP-01 challenges by attaching an HTTPRoute to a Gateway listening for HTTP on port 80. By default, it's the `external` Gateway in the `envoy-gateway-system` namespace, deployed by the Envoy Gateway package, so no further configuration is needed.
 
 ```yaml
-gateway_api:
-  enabled: true
 issuers:
   letsencrypt:
     enabled: true

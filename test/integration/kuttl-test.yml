@@ -16,6 +16,9 @@ commands:
         -f https://github.com/carvel-dev/kapp-controller/releases/latest/download/release.yml
   - script: |
       kubectl config set-context --current --namespace=tests && \
+      kapp deploy -a gateway-api-package -y \
+        -f https://github.com/kadras-io/package-for-gateway-api/releases/download/v1.6.1/package.yml \
+        -f https://github.com/kadras-io/package-for-gateway-api/releases/download/v1.6.1/metadata.yml && \
       kapp deploy -a kyverno-package -y \
         -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.19.2/package.yml \
         -f https://github.com/kadras-io/package-for-kyverno/releases/download/v1.19.2/metadata.yml

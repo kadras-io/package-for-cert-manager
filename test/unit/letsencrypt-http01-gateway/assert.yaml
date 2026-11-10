@@ -1,21 +1,21 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-staging-issuer
+  name: letsencrypt-prod-issuer
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    (email == null): true
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: security@kadras.io
     privateKeySecretRef:
-      name: letsencrypt-staging
+      name: letsencrypt-prod
     solvers:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
           - group: gateway.networking.k8s.io
             kind: Gateway
-            name: contour
-            namespace: projectcontour
+            name: external
+            namespace: envoy-gateway-system
 ---
 apiVersion: v1
 kind: ConfigMap

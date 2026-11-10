@@ -18,13 +18,11 @@ data:
       namespace: cert-manager
     logging:
       verbosity: 2
-      format: text
+      format: json
     gatewayAPI:
-      enabled: false
-    ingressShimConfig:
-      defaultIssuerName: kadras-ca-issuer
-      defaultIssuerKind: ClusterIssuer
-      defaultIssuerGroup: cert-manager.io
+      enabled: true
+    # The Ingress support isn't configured, since certificates are issued for Gateways.
+    (ingressShimConfig == null): true
     acmeHTTP01Config:
       # Read from the upstream manifest, so that it matches the version of the controller.
       (starts_with(solverImage, 'quay.io/jetstack/cert-manager-acmesolver:v')): true

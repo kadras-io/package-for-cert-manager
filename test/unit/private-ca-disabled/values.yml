@@ -1,0 +1,5 @@
+#! Without the private CA, no ClusterIssuer nor Certificate is included.
+---
+issuers:
+  private_ca:
+    enabled: false

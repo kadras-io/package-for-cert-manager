@@ -82,14 +82,6 @@ def controller_config():
     },
   }
 
-  if data.values.issuers.default_issuer:
-    config["ingressShimConfig"] = {
-      "defaultIssuerName": data.values.issuers.default_issuer,
-      "defaultIssuerKind": "ClusterIssuer",
-      "defaultIssuerGroup": "cert-manager.io",
-    }
-  end
-
   return config
 end
 
@@ -133,23 +125,17 @@ def letsencrypt_environment():
   return _letsencrypt_environments[data.values.issuers.letsencrypt.environment]
 end
 
+# HTTP-01 challenges are solved via an HTTPRoute attached to a Gateway, never via an Ingress.
 def http01_solver():
-  http01 = data.values.issuers.letsencrypt.http01
-  if data.values.gateway_api.enabled:
-    return {
-      "gatewayHTTPRoute": {
-        "parentRefs": [{
-          "group": "gateway.networking.k8s.io",
-          "kind": "Gateway",
-          "name": http01.gateway.name,
-          "namespace": http01.gateway.namespace,
-        }],
-      },
-    }
-  end
+  gateway = data.values.issuers.letsencrypt.http01.gateway
   return {
-    "ingress": {
-      "ingressClassName": http01.ingress_class,
+    "gatewayHTTPRoute": {
+      "parentRefs": [{
+        "group": "gateway.networking.k8s.io",
+        "kind": "Gateway",
+        "name": gateway.name,
+        "namespace": gateway.namespace,
+      }],
     },
   }
 end

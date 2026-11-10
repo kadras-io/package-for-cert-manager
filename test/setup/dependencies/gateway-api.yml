@@ -1,0 +1,16 @@
+---
+# The Gateway API CRDs, required by cert-manager.
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: gateway-api
+  namespace: tests
+  annotations:
+    kapp.k14s.io/change-group: gateway-api
+    kapp.k14s.io/change-rule.serviceaccount: delete before deleting serviceaccount
+spec:
+  serviceAccountName: kadras-install-sa
+  packageRef:
+    refName: gateway-api.packages.kadras.io
+    versionSelection:
+      constraints: 1.6.1

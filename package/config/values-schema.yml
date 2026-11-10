@@ -8,9 +8,9 @@
 #@   return hours(private_ca["renew_before"]) < hours(private_ca["duration"])
 #@ end
 
-#@ def default_issuer_available(values):
-#@   issuers = values["issuers"]
-#@   return issuers["default_issuer"] != "kadras-ca-issuer" or issuers["private_ca"]["enabled"]
+#@ def http01_gateway_api_enabled(values):
+#@   letsencrypt = values["issuers"]["letsencrypt"]
+#@   return not letsencrypt["enabled"] or letsencrypt["solver"] != "http01" or values["gateway_api"]["enabled"]
 #@ end
 
 #@ def is_dns01(ctx, providers=None):
@@ -22,7 +22,7 @@
 #@ end
 
 #@data/values-schema
-#@schema/validation ("`issuers.private_ca.renew_before` to be shorter than `issuers.private_ca.duration`", renewal_before_expiry), ("`issuers.default_issuer` to be changed when `issuers.private_ca.enabled` is false, since `kadras-ca-issuer` isn't included", default_issuer_available)
+#@schema/validation ("`issuers.private_ca.renew_before` to be shorter than `issuers.private_ca.duration`", renewal_before_expiry), ("`gateway_api.enabled` to be true when `issuers.letsencrypt.solver` is `http01`, since the HTTP-01 challenges are solved via an HTTPRoute", http01_gateway_api_enabled)
 ---
 
 #@schema/desc "The namespace in which to deploy cert-manager. It's also where ClusterIssuers look for their Secrets and where leader election happens."
@@ -66,8 +66,8 @@ webhook:
 
 #@schema/desc "Settings for the Kubernetes Gateway API support. See https://cert-manager.io/docs/usage/gateway."
 gateway_api:
-  #@schema/desc "Whether to issue certificates for annotated Gateways, and to solve the Let's Encrypt HTTP-01 challenges via `issuers.letsencrypt.http01.gateway` instead of an Ingress. The Gateway API CRDs must be installed before cert-manager starts."
-  enabled: false
+  #@schema/desc "Whether to issue certificates for annotated Gateways, and to solve the Let's Encrypt HTTP-01 challenges via an HTTPRoute attached to `issuers.letsencrypt.http01.gateway`. The Gateway API CRDs must be installed before cert-manager starts, or the controller fails to start."
+  enabled: true
 
 #! =============================================
 #! Issuers
@@ -100,19 +100,16 @@ issuers:
     #@schema/validation one_of=["http01", "dns01"]
     solver: http01
 
-    #@schema/desc "Settings for the HTTP-01 challenge, solved by serving a token over HTTP on port 80 of each domain."
+    #@schema/desc "Settings for the HTTP-01 challenge, solved by serving a token over HTTP on port 80 of each domain. It requires `gateway_api.enabled`."
     http01:
-      #@schema/desc "The IngressClass of the Ingress created to solve the challenge, when `gateway_api.enabled` is false. The default is the one of the Kadras Contour package."
-      #@schema/validation min_len=1
-      ingress_class: contour
-      #@schema/desc "The Gateway to attach the HTTPRoute solving the challenge to, when `gateway_api.enabled` is true. It needs a listener for HTTP on port 80. The default is the one of the Kadras Contour package."
+      #@schema/desc "The Gateway to attach the HTTPRoute solving the challenge to. It needs a listener for HTTP on port 80 that accepts routes from the namespaces of the Certificates. The default is the external Gateway of the Kadras Envoy Gateway package."
       gateway:
         #@schema/desc "The name of the Gateway."
         #@schema/validation ("a valid DNS name", is_dns_name)
-        name: contour
+        name: external
         #@schema/desc "The namespace of the Gateway."
         #@schema/validation ("a valid DNS label", is_dns_label)
-        namespace: projectcontour
+        namespace: envoy-gateway-system
 
     #@schema/desc "Settings for the DNS-01 challenge, solved by creating a TXT record in the DNS zone of each domain."
     dns01:
@@ -162,11 +159,6 @@ issuers:
       #@schema/desc "Whether to only query `recursive_nameservers` to check the TXT records, instead of the authoritative servers of the zone. Useful when the authoritative servers aren't reachable, at the cost of slower checks due to caching."
       recursive_nameservers_only: false
 
-  #@schema/desc "The ClusterIssuer used for Ingresses annotated with `kubernetes.io/tls-acme: \"true\"` and no issuer annotation. Set it to `\"\"` to disable it."
-  #@schema/examples ("Let's Encrypt", "letsencrypt-prod-issuer")
-  #@schema/validation ("a valid DNS name", lambda v: v == "" or is_dns_name(v))
-  default_issuer: kadras-ca-issuer
-
 #! =============================================
 #! Observability
 #! =============================================
@@ -179,7 +171,7 @@ observability:
     level: info
     #@schema/desc "The log format for all the components."
     #@schema/validation one_of=["text", "json"]
-    format: text
+    format: json
   metrics:
     #@schema/desc "Whether to annotate the Pods for Prometheus scraping. All the components expose metrics on port 9402."
     enabled: true

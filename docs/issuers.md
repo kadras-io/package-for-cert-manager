@@ -52,19 +52,16 @@ Let's Encrypt verifies that you control the domains of a certificate via a [chal
 
 ### HTTP-01
 
-cert-manager serves a token on port 80 of each domain, so the domains must point to your ingress controller and be reachable from the Internet. It doesn't support wildcard certificates.
+cert-manager serves a token on port 80 of each domain, so the domains must point to a Gateway reachable from the Internet. It doesn't support wildcard certificates.
 
-By default, cert-manager routes the challenge requests via an Ingress with the `contour` IngressClass, which is served by the [Contour package](https://github.com/kadras-io/package-for-contour).
+The challenge requests are routed via an HTTPRoute attached to a Gateway, which requires the Gateway API support (enabled by default). By default, it's the `external` Gateway of the [Envoy Gateway package](https://github.com/kadras-io/package-for-envoy-gateway). See [gateway-api.md](gateway-api.md#http-01-challenges). To solve them via an Ingress, see [ingress.md](ingress.md#http-01-challenges).
 
 ```yaml
 issuers:
   letsencrypt:
     enabled: true
-    http01:
-      ingress_class: contour
+    solver: http01
 ```
-
-When `gateway_api.enabled` is true, cert-manager attaches an HTTPRoute to the Gateway of the Contour package instead. See [gateway-api.md](gateway-api.md#http-01-challenges).
 
 ### DNS-01
 
@@ -175,21 +172,7 @@ issuers:
 
 ## Default issuer
 
-Ingresses annotated with `kubernetes.io/tls-acme: "true"` and no issuer annotation get their certificates from the default issuer: `kadras-ca-issuer`, unless you change it. See [Ingress](https://cert-manager.io/docs/usage/ingress/).
-
-```yaml
-issuers:
-  default_issuer: letsencrypt-prod-issuer
-```
-
-When you disable the private CA, change the default issuer too, or set it to `""` to disable it.
-
-```yaml
-issuers:
-  private_ca:
-    enabled: false
-  default_issuer: ""
-```
+The package doesn't configure a default issuer: it only applies to Ingresses annotated with `kubernetes.io/tls-acme: "true"`, while Gateways always name their issuer via the `cert-manager.io/cluster-issuer` or `cert-manager.io/issuer` annotation. See [gateway-api.md](gateway-api.md#certificates-for-gateways), or [ingress.md](ingress.md#default-issuer) to configure one.
 
 ## Certificate defaults
 

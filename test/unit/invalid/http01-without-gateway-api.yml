@@ -1,0 +1,8 @@
+# expected: `gateway_api.enabled` to be true when `issuers.letsencrypt.solver` is `http01`
+---
+gateway_api:
+  enabled: false
+issuers:
+  letsencrypt:
+    enabled: true
+    solver: http01

@@ -23,8 +23,10 @@ spec:
   acme:
     solvers:
     - http01:
-        ingress:
-          ingressClassName: contour
+        gatewayHTTPRoute:
+          parentRefs:
+          - name: external
+            namespace: envoy-gateway-system
 ---
 apiVersion: v1
 kind: ConfigMap
